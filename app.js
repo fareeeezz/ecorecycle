@@ -5,9 +5,10 @@ const POINTS_PER_KG = 10;   // points per kg
 // --- OOP CLASSES ---
 
 class User {
-  constructor(name, email) {
+  constructor(name, email, phone) {
     this.name = name;
     this.email = email;
+    this.phone = phone;
   }
 }
 
@@ -53,13 +54,15 @@ function handleLogin(event) {
   event.preventDefault();
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim(); // new
 
-  const user = new User(name, email);
+  const user = new User(name, email, phone);
   saveUser(user);
 
-  // go to next page
   window.location.href = 'request.html';
 }
+
+
 
 function handleRequestSubmit(event) {
   event.preventDefault();
