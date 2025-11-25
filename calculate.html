@@ -1,23 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>EcoRecycle – Hasil Kiraan</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="bg-light">
+function displayCalculation() {
+  const container = document.getElementById('calcContainer');
+  const reqData = getRequest();
 
-<nav class="navbar navbar-expand-lg navbar-success bg-success">
-  <div class="container-fluid">
-    <a href="index.html" class="navbar-brand text-white fw-bold">EcoRecycle</a>
-  </div>
-</nav>
+  if (!reqData || !container) {
+    container.innerHTML = '<p class="text-center">Tiada data. Sila buat request semula.</p>';
+    return;
+  }
 
-<div class="container py-5" id="calcContainer">
-  <!-- JS will fill this -->
-</div>
+  const user = reqData.user; // plain object from localStorage
+  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
+  const result = IncentiveCalculator.calculate(request);
 
-<script src="app.js"></script>
-</body>
-</html>
+  const totalRM = result.totalIncentive.toFixed(2);
+  const totalPoints = result.points.toFixed(0);
+
+  // --- Receipt text ---
+  const receiptText = `
+RESIT PICKUP ECORCYCLE
+Nama: ${user.name}
+Emel: ${user.email}
+Telefon: ${user.phone || '-'}
+Jenis Barang: ${request.material}
+Berat: ${request.weightKg} kg
+Insentif: RM ${totalRM}
+Mata Ganjaran: ${totalPoints}
+Terima kasih kerana menyokong kitar semula.
+  `.trim();
+
+  // --- WhatsApp message (guna lebih ringkas) ---
+  const whatsappMsg = `
+EcoRecycle: Terima kasih ${user.name}! 
+Pickup ${request.material} (${request.weightKg} kg) diterima.
+Insentif: RM ${totalRM}. Mata: ${totalPoints}.
+  `.trim();
+
+  // Bersihkan nombor telefon – ambil digit sahaja
+  const waNumber = (user.phone || '').replace(/\D/g, '');
+  // Link "click to chat" WhatsApp
+  const waUrl = waNumber
+    ? `https://wa.me/${waNumber}?text=${encodeURIComponent(whatsappMsg)}`
+    : '';
+
+  container.innerHTML = `
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <h2 class="mb-4 text-center">Resit & Notifikasi</h2>
+
+        <!-- Resit -->
+        <div class="card shadow-sm mb-4" id="receiptCard">
+          <div class="card-body">
+            <h5 class="card-title">Resit Pickup</h5>
+            <p><strong>Nama:</strong> ${user.name}</p>
+            <p><strong>Emel:</strong> ${user.email}</p>
+            <p><strong>Telefon:</strong> ${user.phone || '-'}</p>
+            <p><strong>Jenis Barang:</strong> ${request.material}</p>
+            <p><strong>Berat:</strong> ${request.weightKg} kg</p>
+            <hr>
+            <p class="fs-5"><strong>Insentif:</strong> RM ${totalRM}</p>
+            <p class="fs-5"><strong>Mata Ganjaran:</strong> ${totalPoints} points</p>
+          </div>
+        </div>
+
+        <!-- Teks resit (boleh copy / print) -->
+        <div class="mb-3">
+          <label class="form-label">Teks Resit (copy / simpan)</label>
+          <textarea class="form-control" rows="5" readonly>${receiptText}</textarea>
+        </div>
+
+        <!-- Notifikasi Preview -->
+        <h4 class="mb-3">Notifikasi (Output Preview)</h4>
+        <div class="mb-3">
+          <label class="form-label">WhatsApp kepada pengguna</label>
+          <textarea class="form-control" rows="3" readonly>${whatsappMsg}</textarea>
+        </div>
+
+        <!-- Butang tindakan -->
+        ${waUrl ? `
+          <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
+            Hantar Resit melalui WhatsApp
+          </a>
+        ` : `
+          <div class="alert alert-warning">
+            Nombor telefon tidak sah atau kosong. Tidak boleh jana link WhatsApp.
+          </div>
+        `}
+
+        <button class="btn btn-outline-secondary w-100 mb-2" onclick="window.print()">
+          Print / Save Resit sebagai PDF
+        </button>
+
+        <a href="request.html" class="btn btn-outline-success w-100 mt-2">Buat Request Baru</a>
+      </div>
+    </div>
+  `;
+}
+
