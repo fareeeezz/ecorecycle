@@ -57,7 +57,7 @@ function handleLogin(event) {
   event.preventDefault();
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim(); // new
+  const phone = document.getElementById('phone').value.trim();
 
   const user = new User(name, email, phone);
   saveUser(user);
@@ -203,7 +203,7 @@ function downloadReceiptPdf() {
   const totalPoints = result.points.toFixed(0);
 
   if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam HTML.");
+    alert("PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam calculate.html.");
     return;
   }
 
