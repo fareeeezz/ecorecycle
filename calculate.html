@@ -7,44 +7,48 @@ function displayCalculation() {
     return;
   }
 
-  const user = reqData.user; // plain object from localStorage
+  const user = reqData.user; // plain object dari localStorage
   const request = new PickupRequest(user, reqData.material, reqData.weightKg);
   const result = IncentiveCalculator.calculate(request);
 
   const totalRM = result.totalIncentive.toFixed(2);
   const totalPoints = result.points.toFixed(0);
 
-  // --- Receipt text ---
+  // --- Teks resit untuk preview / copy ---
   const receiptText = `
 RESIT PICKUP ECORCYCLE
-Nama: ${user.name}
-Emel: ${user.email}
-Telefon: ${user.phone || '-'}
-Jenis Barang: ${request.material}
-Berat: ${request.weightKg} kg
-Insentif: RM ${totalRM}
-Mata Ganjaran: ${totalPoints}
+
+Nama          : ${user.name}
+Emel          : ${user.email}
+Telefon       : ${user.phone || '-'}
+Jenis Barang  : ${request.material}
+Berat         : ${request.weightKg} kg
+Insentif      : RM ${totalRM}
+Mata Ganjaran : ${totalPoints}
+
 Terima kasih kerana menyokong kitar semula.
   `.trim();
 
-  // --- WhatsApp message (guna lebih ringkas) ---
-  const whatsappMsg = `
-EcoRecycle: Terima kasih ${user.name}! 
-Pickup ${request.material} (${request.weightKg} kg) diterima.
-Insentif: RM ${totalRM}. Mata: ${totalPoints}.
-  `.trim();
+  // --- Mesej WhatsApp ke OWNER (alamat sengaja kosong) ---
+  const waMessage = `
+EcoRecycle Pickup Request
 
-  // Bersihkan nombor telefon – ambil digit sahaja
-  const waNumber = (user.phone || '').replace(/\D/g, '');
-  // Link "click to chat" WhatsApp
-  const waUrl = waNumber
-    ? `https://wa.me/${waNumber}?text=${encodeURIComponent(whatsappMsg)}`
-    : '';
+Nama: ${user.name}
+Emel: ${user.email}
+Telefon: ${user.phone || '-'}
+Jenis barang: ${request.material}
+Berat: ${request.weightKg} kg
+Insentif: RM ${totalRM}
+Mata ganjaran: ${totalPoints}
+Alamat: 
+  `.trim(); // user akan isi alamat lepas "Alamat: "
+
+  const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
 
   container.innerHTML = `
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <h2 class="mb-4 text-center">Resit & Notifikasi</h2>
+        <h2 class="mb-4 text-center">Resit & WhatsApp</h2>
 
         <!-- Resit -->
         <div class="card shadow-sm mb-4" id="receiptCard">
@@ -61,32 +65,31 @@ Insentif: RM ${totalRM}. Mata: ${totalPoints}.
           </div>
         </div>
 
-        <!-- Teks resit (boleh copy / print) -->
+        <!-- Teks resit (boleh copy / simpan) -->
         <div class="mb-3">
           <label class="form-label">Teks Resit (copy / simpan)</label>
-          <textarea class="form-control" rows="5" readonly>${receiptText}</textarea>
+          <textarea class="form-control" rows="7" readonly>${receiptText}</textarea>
         </div>
 
-        <!-- Notifikasi Preview -->
-        <h4 class="mb-3">Notifikasi (Output Preview)</h4>
+        <!-- Notifikasi Preview / WhatsApp -->
+        <h4 class="mb-3">Mesej WhatsApp ke Owner</h4>
         <div class="mb-3">
-          <label class="form-label">WhatsApp kepada pengguna</label>
-          <textarea class="form-control" rows="3" readonly>${whatsappMsg}</textarea>
+          <label class="form-label">Preview mesej WhatsApp</label>
+          <textarea class="form-control" rows="6" readonly>${waMessage}</textarea>
         </div>
+
+        <p class="text-muted">
+          Bila tekan butang di bawah, WhatsApp akan terbuka dengan mesej ini.
+          Bahagian <strong>"Alamat:"</strong> masih kosong supaya pengguna boleh isi alamat sebelum tekan send.
+        </p>
 
         <!-- Butang tindakan -->
-        ${waUrl ? `
-          <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
-            Hantar Resit melalui WhatsApp
-          </a>
-        ` : `
-          <div class="alert alert-warning">
-            Nombor telefon tidak sah atau kosong. Tidak boleh jana link WhatsApp.
-          </div>
-        `}
+        <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
+          Buka WhatsApp &amp; Isi Alamat
+        </a>
 
-        <button class="btn btn-outline-secondary w-100 mb-2" onclick="window.print()">
-          Print / Save Resit sebagai PDF
+        <button class="btn btn-outline-secondary w-100 mb-2" onclick="downloadReceiptPdf()">
+          Muat Turun Resit (PDF)
         </button>
 
         <a href="request.html" class="btn btn-outline-success w-100 mt-2">Buat Request Baru</a>
@@ -94,4 +97,3 @@ Insentif: RM ${totalRM}. Mata: ${totalPoints}.
     </div>
   `;
 }
-
