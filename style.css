@@ -2,22 +2,50 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* Background utama untuk semua page */
+/* Body wrapper */
 .app-body {
   min-height: 100vh;
   margin: 0;
-  background: linear-gradient(135deg, #a8edea, #fed6e3);
-
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Bagi card naik sikit dari background */
+/* Video background */
+#bgVideo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: cover;      /* isi penuh tanpa distorsi teruk */
+  z-index: -2;            /* betul-betul belakang */
+}
+
+/* Overlay lembut di atas video supaya teks tak tenggelam */
+.app-body::before {
+  content: "";
+  position: fixed;
+  inset: 0;               /* top:0; right:0; bottom:0; left:0 */
+  background: rgba(255, 255, 255, 0.7); /* boleh adjust 0.5-0.8 ikut terang */
+  z-index: -1;
+}
+
+/* Semua content biasa (navbar, container, card) kekal di atas overlay */
+.app-body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Card style */
 .card {
   border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.9); /* putih sedikit transparent */
 }
 
-/* Navbar hijau lebih pekat */
+/* Navbar hijau */
 .navbar-success {
   background-color: #198754;
 }
-
