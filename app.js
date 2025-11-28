@@ -275,28 +275,92 @@ function downloadReceiptPdf() {
   }
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
 
-  let y = 10;
-  doc.setFontSize(16);
-  doc.text("Resit Pickup EcoRecycle", 10, y);
+  // ✅ A4 portrait, unit mm
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4"
+  });
+
+  const pageWidth  = doc.internal.pageSize.getWidth();   // ~210 mm
+  const pageHeight = doc.internal.pageSize.getHeight();  // ~297 mm
+  const margin = 20;
+
+  let y = margin;
+
+  // Tajuk besar tengah
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("Resit Pickup EcoRecycle", pageWidth / 2, y, { align: "center" });
+
+  y += 10;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  const tarikh = new Date().toLocaleDateString("ms-MY");
+  doc.text(`Tarikh: ${tarikh}`, margin, y);
   y += 10;
 
-  doc.setFontSize(12);
-  doc.text(`Username: ${displayName}`, 10, y);    y += 7;
-  doc.text(`Telefon: ${user.phone || "-"}`, 10, y);    y += 7;
-  doc.text(`Jenis barang: ${request.material}`, 10, y); y += 7;
-  doc.text(`Berat: ${request.weightKg} kg`, 10, y);     y += 7;
+  // Kotak info utama
+  const boxTop = y;
+  const boxHeight = 90;
+  const boxWidth = pageWidth - 2 * margin;
 
-  y += 3;
-  doc.text(`Insentif: RM ${totalRM}`, 10, y);           y += 7;
-  doc.text(`Mata ganjaran: ${totalPoints}`, 10, y);
+  // kotak dengan bucu bulat
+  doc.roundedRect(margin, boxTop, boxWidth, boxHeight, 3, 3);
 
-  y += 10;
-  doc.text("Terima kasih kerana menyokong kitar semula.", 10, y);
+  let textY = boxTop + 12;
+  const textX = margin + 7;
 
+  doc.setFont("helvetica", "bold");
+  doc.text("Maklumat Pengguna", textX, textY);
+  textY += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.text(`Username   : ${displayName}`, textX, textY);  textY += 7;
+  doc.text(`Telefon    : ${user.phone || "-"}`, textX, textY); textY += 7;
+
+  textY += 3;
+  doc.setFont("helvetica", "bold");
+  doc.text("Maklumat Pickup", textX, textY);
+  textY += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.text(`Jenis barang : ${request.material}`, textX, textY);  textY += 7;
+  doc.text(`Berat        : ${request.weightKg} kg`, textX, textY); textY += 7;
+
+  textY += 3;
+  doc.setFont("helvetica", "bold");
+  doc.text("Kiraan Insentif", textX, textY);
+  textY += 8;
+
+  doc.setFont("helvetica", "normal");
+  doc.text(`Insentif      : RM ${totalRM}`, textX, textY);   textY += 7;
+  doc.text(`Mata ganjaran : ${totalPoints} points`, textX, textY);
+
+  // Nota bawah
+  y = boxTop + boxHeight + 15;
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(10);
+  doc.text(
+    "Terima kasih kerana menyokong aktiviti kitar semula bersama EcoRecycle.",
+    margin,
+    y
+  );
+
+  // Optional: footer kecil
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    "Resit ini dijana secara automatik oleh sistem EcoRecycle.",
+    margin,
+    pageHeight - 15
+  );
+
+  // ✅ Simpan sebagai fail PDF A4
   doc.save("Resit_EcoRecycle.pdf");
 }
+
 
 
 // ====================================
