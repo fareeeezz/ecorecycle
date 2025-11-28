@@ -71,30 +71,38 @@ function getDisplayName(user) {
 // ====================================
 
 function handleLogin(event) {
-  event.preventDefault();
+  // supaya page tak reload default
+  if (event) event.preventDefault();
 
-  const usernameEl = document.getElementById("username");
-  const phoneEl = document.getElementById("phone");
-  const passwordEl = document.getElementById("password");
+  // DEBUG: tengok dalam console sama ada fungsi ni dipanggil
+  console.log("handleLogin dipanggil");
 
-  if (!usernameEl || !phoneEl || !passwordEl) {
-    alert("Ralat: medan login tidak dijumpai. Semak semula ID elemen dalam index.html.");
-    return;
+  const usernameInput = document.getElementById("username");
+  const phoneInput    = document.getElementById("phone");
+  const passwordInput = document.getElementById("password");
+
+  if (!usernameInput || !phoneInput || !passwordInput) {
+    alert("Ralat: ID input tak jumpa. Pastikan id='username', 'phone', 'password' dalam index.html.");
+    return false;
   }
 
-  const username = usernameEl.value.trim();
-  const phone = phoneEl.value.trim();
-  const password = passwordEl.value.trim();
+  const username = usernameInput.value.trim();
+  const phone    = phoneInput.value.trim();
+  const password = passwordInput.value.trim();
 
+  // Kalau kosong, jangan bagi pergi
   if (!username || !phone || !password) {
-    alert("Sila isi semua medan login.");
-    return;
+    alert("Sila isi Username, Nombor Telefon dan Kata Laluan.");
+    return false;
   }
 
+  // Simpan user dalam localStorage (OOP class User)
   const user = new User(username, phone, password);
   saveUser(user);
 
+  // Redirect ke halaman request
   window.location.href = "request.html";
+  return false;   // pastikan form tak submit default
 }
 
 
