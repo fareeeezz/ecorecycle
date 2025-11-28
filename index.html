@@ -8,7 +8,7 @@
 </head>
 <body class="app-body">
 
-  <!-- VIDEO BACKGROUND (kalau ada eco-bg.mp4) -->
+  <!-- VIDEO BACKGROUND -->
   <video autoplay muted loop playsinline id="bgVideo">
     <source src="eco-bg.mp4" type="video/mp4">
   </video>
@@ -25,7 +25,7 @@
       </div>
 
       <nav class="eco-nav d-none d-md-flex gap-3">
-        <a href="index.html" class="eco-nav-link">Login</a>
+        <a href="index.html" class="eco-nav-link eco-nav-link-active">Login</a>
         <a href="request.html" class="eco-nav-link">Request Pickup</a>
         <a href="calculate.html" class="eco-nav-link">Resit</a>
       </nav>
@@ -48,33 +48,50 @@
           <div class="card-body">
             <h5 class="card-title mb-3 text-center">Log Masuk</h5>
 
-            <!-- ❗ PASTIKAN ID = loginForm -->
             <form id="loginForm">
               <div class="mb-3">
                 <label class="form-label">Username</label>
-                <!-- ❗ ID = username -->
-                <input type="text" class="form-control" id="username"
-                       autocomplete="username" required>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  autocomplete="username"
+                  required
+                  placeholder="contoh: fareez_eco"
+                >
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Nombor Telefon (WhatsApp)</label>
-                <!-- ❗ ID = phone -->
-                <input type="tel" class="form-control" id="phone"
-                       placeholder="contoh: 60123456789"
-                       autocomplete="tel" required>
+                <input
+                  type="tel"
+                  class="form-control"
+                  id="phone"
+                  placeholder="contoh: 60123456789"
+                  autocomplete="tel"
+                  required
+                >
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Kata Laluan</label>
-                <!-- ❗ ID = password -->
-                <input type="password" class="form-control" id="password"
-                       autocomplete="current-password" required>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  autocomplete="current-password"
+                  required
+                  placeholder="Masukkan kata laluan"
+                >
               </div>
 
               <button type="submit" class="btn btn-success w-100">
                 Log Masuk
               </button>
+
+              <p class="text-muted small text-center mt-2 mb-0">
+                Maklumat login hanya digunakan untuk sesi demo sistem EcoRecycle.
+              </p>
             </form>
 
           </div>
@@ -83,12 +100,8 @@
     </div>
   </div>
 
-  <!-- load JS -->
-  <script src="app.js?v=3"></script>
+  <!-- JS -->
+  <script src="app.js"></script>
 </body>
 </html>
 
-
-<script src="app.js"></script>
-</body>
-</html>
