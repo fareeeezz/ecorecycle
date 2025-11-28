@@ -8,12 +8,12 @@
 </head>
 <body class="app-body">
 
-  <!-- VIDEO BACKGROUND -->
+  <!-- VIDEO BACKGROUND (kalau ada eco-bg.mp4) -->
   <video autoplay muted loop playsinline id="bgVideo">
     <source src="eco-bg.mp4" type="video/mp4">
   </video>
 
-  <!-- HEADER BARU -->
+  <!-- HEADER -->
   <header class="eco-header">
     <div class="container d-flex justify-content-between align-items-center py-2">
       <div class="d-flex align-items-center gap-2">
@@ -48,15 +48,18 @@
           <div class="card-body">
             <h5 class="card-title mb-3 text-center">Log Masuk</h5>
 
+            <!-- ❗ PASTIKAN ID = loginForm -->
             <form id="loginForm">
               <div class="mb-3">
                 <label class="form-label">Username</label>
+                <!-- ❗ ID = username -->
                 <input type="text" class="form-control" id="username"
                        autocomplete="username" required>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Nombor Telefon (WhatsApp)</label>
+                <!-- ❗ ID = phone -->
                 <input type="tel" class="form-control" id="phone"
                        placeholder="contoh: 60123456789"
                        autocomplete="tel" required>
@@ -64,6 +67,7 @@
 
               <div class="mb-3">
                 <label class="form-label">Kata Laluan</label>
+                <!-- ❗ ID = password -->
                 <input type="password" class="form-control" id="password"
                        autocomplete="current-password" required>
               </div>
@@ -79,7 +83,8 @@
     </div>
   </div>
 
-  <script src="app.js?v=2"></script>
+  <!-- load JS -->
+  <script src="app.js?v=3"></script>
 </body>
 </html>
 
