@@ -8,11 +8,13 @@
 </head>
 <body class="app-body">
 
+  <!-- VIDEO BACKGROUND -->
   <video autoplay muted loop playsinline id="bgVideo">
     <source src="eco-bg.mp4" type="video/mp4">
   </video>
 
-   <header class="eco-header">
+  <!-- HEADER BARU -->
+  <header class="eco-header">
     <div class="container d-flex justify-content-between align-items-center py-2">
       <div class="d-flex align-items-center gap-2">
         <div class="eco-logo-circle">♻️</div>
@@ -29,45 +31,58 @@
       </nav>
     </div>
   </header>
-</html>
 
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <h1 class="mb-3 text-center">Pickup Barangan Kitar Semula</h1>
-      <p class="text-muted text-center">
-        Platform untuk mengumpul barangan kitar semula daripada komuniti. Collector EcoRecycle akan datang pickup dan
-        pengguna menerima insentif.
-      </p>
-
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title mb-3 text-center">Log Masuk</h5>
-          <form id="loginForm">
-            <div class="mb-3">
-              <label class="form-label">Nama</label>
-              <input type="text" class="form-control" id="name" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Emel</label>
-              <input type="email" class="form-control" id="email" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Nombor Telefon (WhatsApp)</label>
-              <input type="tel" class="form-control" id="phone" placeholder="contoh: 60123456789" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Kata Laluan</label>
-              <input type="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-success w-100">Log Masuk</button>
-          </form>
-        </div>
+  <!-- CONTENT LOGIN -->
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h1 class="mb-2 text-center">Pickup Barangan Kitar Semula</h1>
+        <p class="text-center text-muted mb-4">
+          Platform untuk mengumpul barangan kitar semula daripada komuniti. Collector EcoRecycle
+          akan datang pickup dan pengguna menerima insentif.
+        </p>
       </div>
 
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title mb-3 text-center">Log Masuk</h5>
+
+            <form id="loginForm">
+              <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" id="username"
+                       autocomplete="username" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Nombor Telefon (WhatsApp)</label>
+                <input type="tel" class="form-control" id="phone"
+                       placeholder="contoh: 60123456789"
+                       autocomplete="tel" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Kata Laluan</label>
+                <input type="password" class="form-control" id="password"
+                       autocomplete="current-password" required>
+              </div>
+
+              <button type="submit" class="btn btn-success w-100">
+                Log Masuk
+              </button>
+            </form>
+
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <script src="app.js?v=2"></script>
+</body>
+</html>
+
 
 <script src="app.js"></script>
 </body>
