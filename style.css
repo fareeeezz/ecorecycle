@@ -95,3 +95,98 @@ body {
 .navbar-success {
   background-color: #198754;
 }
+
+/* ====== REQUEST PAGE STYLING ====== */
+
+.request-main {
+  min-height: calc(100vh - 80px);
+}
+
+.request-hero {
+  color: #123222;
+}
+
+.request-title {
+  font-weight: 700;
+  font-size: 2.4rem;
+}
+
+.request-subtitle {
+  font-size: 0.95rem;
+  max-width: 580px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+/* Kad request */
+.request-card {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Bahagian kiri kad */
+.request-card-left {
+  background: linear-gradient(135deg, #e3f7e7, #f5fff8);
+}
+
+.request-steps {
+  padding-left: 1.1rem;
+  margin-bottom: 0;
+}
+
+.request-steps li {
+  margin-bottom: 0.35rem;
+}
+
+/* Kotak kadar insentif */
+.request-rate-box {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.request-rate-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #198754;
+  font-weight: 600;
+}
+
+.request-rate-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.request-rate-points {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Button utama */
+.btn-request {
+  background-color: #198754;
+  border-color: #198754;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.btn-request:hover {
+  background-color: #146c43;
+  border-color: #146c43;
+}
+
+/* Hint info kecil */
+.request-hint {
+  background-color: rgba(25, 135, 84, 0.05);
+  border-color: rgba(25, 135, 84, 0.4);
+}
+
+/* Active nav link */
+.eco-nav-link-active {
+  text-decoration: underline;
+  font-weight: 600;
+}
+
