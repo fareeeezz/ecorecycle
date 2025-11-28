@@ -94,7 +94,6 @@ function handleLogin(event) {
   const user = new User(username, phone, password);
   saveUser(user);
 
-  // Pergi ke halaman request pickup
   window.location.href = "request.html";
 }
 
@@ -136,7 +135,6 @@ function handleRequestSubmit(event) {
   const request = new PickupRequest(user, material, weight);
   saveRequest(request);
 
-  // Pergi ke halaman resit
   window.location.href = "calculate.html";
 }
 
@@ -149,7 +147,7 @@ function displayCalculation() {
   const container = document.getElementById("calcContainer");
   const reqData = getRequest();
 
-  if (!container) return; // kalau page lain
+  if (!container) return;
 
   if (!reqData) {
     container.innerHTML =
@@ -165,7 +163,6 @@ function displayCalculation() {
   const totalRM = result.totalIncentive.toFixed(2);
   const totalPoints = result.points.toFixed(0);
 
-  // Teks resit (untuk textarea)
   const receiptText = `
 RESIT PICKUP ECORCYCLE
 
@@ -179,7 +176,6 @@ Mata Ganjaran : ${totalPoints}
 Terima kasih kerana menyokong kitar semula.
   `.trim();
 
-  // Mesej WhatsApp ke OWNER
   const waMessage = `
 EcoRecycle Pickup Request
 
@@ -247,17 +243,82 @@ Alamat:
 
 
 // ====================================
-//  JANA & DOWNLOAD PDF RESIT
+//  DOWNLOAD PDF RESIT
 // ====================================
 
 function downloadReceiptPdf() {
   const reqData = getRequest();
   if (!reqData) {
     alert("Tiada data resit untuk dimuat turun.");
+    return;
+  }
+
+  const user = reqData.user;
+  const displayName = getDisplayName(user);
+  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
+  const result = IncentiveCalculator.calculate(request);
+
+  const totalRM = result.totalIncentive.toFixed(2);
+  const totalPoints = result.points.toFixed(0);
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam calculate.html.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let y = 10;
+  doc.setFontSize(16);
+  doc.text("Resit Pickup EcoRecycle", 10, y);
+  y += 10;
+
+  doc.setFontSize(12);
+  doc.text(`Username: ${displayName}`, 10, y);    y += 7;
+  doc.text(`Telefon: ${user.phone || "-"}`, 10, y);    y += 7;
+  doc.text(`Jenis barang: ${request.material}`, 10, y); y += 7;
+  doc.text(`Berat: ${request.weightKg} kg`, 10, y);     y += 7;
+
+  y += 3;
+  doc.text(`Insentif: RM ${totalRM}`, 10, y);           y += 7;
+  doc.text(`Mata ganjaran: ${totalPoints}`, 10, y);
+
+  y += 10;
+  doc.text("Terima kasih kerana menyokong kitar semula.", 10, y);
+
+  doc.save("Resit_EcoRecycle.pdf");
+}
 
 
+// ====================================
+//  INIT – IKUT PAGE
+// ====================================
 
-  <!-- load JS -->
-  <script src="app.js?v=3"></script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", function () {
+
+  // LOGIN PAGE
+  const loginForm = document.getElementById("loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLogin);
+  }
+
+  // REQUEST PAGE
+  const requestForm = document.getElementById("requestForm");
+  if (requestForm) {
+    const user = getUser();
+    const welcomeText = document.getElementById("welcomeText");
+    if (welcomeText) {
+      const displayName = getDisplayName(user);
+      welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
+    }
+    requestForm.addEventListener("submit", handleRequestSubmit);
+  }
+
+  // RESIT PAGE
+  const calcContainer = document.getElementById("calcContainer");
+  if (calcContainer) {
+    displayCalculation();
+  }
+});
+
