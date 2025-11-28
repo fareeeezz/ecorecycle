@@ -1,254 +1,89 @@
-// --- Constants ---
-const RATE_PER_KG = 0.30;   // RM per kg
-const POINTS_PER_KG = 10;   // points per kg
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EcoRecycle – Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-body">
 
-// Nombor WhatsApp owner EcoRecycle (format: 60 + nombor, tanpa + dan tanpa 0 depan)
-const ADMIN_WA_NUMBER = "60123456789"; // TUKAR IKUT OWNER SEBENAR
+  <!-- VIDEO BACKGROUND (kalau ada eco-bg.mp4) -->
+  <video autoplay muted loop playsinline id="bgVideo">
+    <source src="eco-bg.mp4" type="video/mp4">
+  </video>
 
-// --- OOP CLASSES ---
+  <!-- HEADER -->
+  <header class="eco-header">
+    <div class="container d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="eco-logo-circle">♻️</div>
+        <div>
+          <div class="eco-title">EcoRecycle</div>
+          <div class="eco-subtitle">Pickup Kitar Semula Komuniti</div>
+        </div>
+      </div>
 
-class User {
-  constructor(username, phone, password) {
-    this.username = username;
-    this.phone = phone;
-    this.password = password; // hanya untuk simulasi, tidak digunakan untuk auth sebenar
-  }
-}
+      <nav class="eco-nav d-none d-md-flex gap-3">
+        <a href="index.html" class="eco-nav-link">Login</a>
+        <a href="request.html" class="eco-nav-link">Request Pickup</a>
+        <a href="calculate.html" class="eco-nav-link">Resit</a>
+      </nav>
+    </div>
+  </header>
 
-class PickupRequest {
-  constructor(user, material, weightKg) {
-    this.user = user;
-    this.material = material;
-    this.weightKg = weightKg;
-  }
-}
-
-class IncentiveCalculator {
-  static calculate(request) {
-    const totalIncentive = request.weightKg * RATE_PER_KG;
-    const points = request.weightKg * POINTS_PER_KG;
-    return { totalIncentive, points };
-  }
-}
-
-// --- Helper functions (Model / storage) ---
-
-function saveUser(user) {
-  localStorage.setItem('eco_user', JSON.stringify(user));
-}
-
-function getUser() {
-  const data = localStorage.getItem('eco_user');
-  return data ? JSON.parse(data) : null;
-}
-
-function saveRequest(request) {
-  localStorage.setItem('eco_request', JSON.stringify(request));
-}
-
-function getRequest() {
-  const data = localStorage.getItem('eco_request');
-  return data ? JSON.parse(data) : null;
-}
-
-// --- Event handlers ---
-
-function handleLogin(event) {
-  event.preventDefault();
-
-  const username = document.getElementById('username').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  const user = new User(username, phone, password);
-  saveUser(user);
-
-  window.location.href = 'request.html';
-}
-
-function handleRequestSubmit(event) {
-  event.preventDefault();
-  const user = getUser();
-  if (!user) {
-    alert('Sesi tamat. Sila log masuk semula.');
-    window.location.href = 'index.html';
-    return;
-  }
-
-  const material = document.getElementById('material').value;
-  const weight = parseFloat(document.getElementById('weight').value);
-
-  const request = new PickupRequest(user, weight ? material : material, weight);
-  saveRequest(request);
-
-  window.location.href = 'calculate.html';
-}
-
-// --- Papar resit + WhatsApp + PDF ---
-
-function displayCalculation() {
-  const container = document.getElementById('calcContainer');
-  const reqData = getRequest();
-
-  if (!reqData || !container) {
-    container.innerHTML = '<p class="text-center">Tiada data. Sila buat request semula.</p>';
-    return;
-  }
-
-  const user = reqData.user; // plain object dari localStorage
-  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
-  const result = IncentiveCalculator.calculate(request);
-
-  const totalRM = result.totalIncentive.toFixed(2);
-  const totalPoints = result.points.toFixed(0);
-
-  // --- Teks resit untuk preview / copy ---
-  const receiptText = `
-RESIT PICKUP ECORCYCLE
-
-Username      : ${user.username}
-Telefon       : ${user.phone || '-'}
-Jenis Barang  : ${request.material}
-Berat         : ${request.weightKg} kg
-Insentif      : RM ${totalRM}
-Mata Ganjaran : ${totalPoints}
-
-Terima kasih kerana menyokong kitar semula.
-  `.trim();
-
-  // --- Mesej WhatsApp ke OWNER (alamat sengaja kosong) ---
-  const waMessage = `
-EcoRecycle Pickup Request
-
-Username: ${user.username}
-Telefon: ${user.phone || '-'}
-Jenis barang: ${request.material}
-Berat: ${request.weightKg} kg
-Insentif: RM ${totalRM}
-Mata ganjaran: ${totalPoints}
-Alamat: 
-  `.trim(); // user akan isi alamat lepas "Alamat: "
-
-  const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
-
-  container.innerHTML = `
+  <!-- CONTENT LOGIN -->
+  <div class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-md-8">
-        <h2 class="mb-4 text-center">Resit & WhatsApp</h2>
+      <div class="col-lg-8">
+        <h1 class="mb-2 text-center">Pickup Barangan Kitar Semula</h1>
+        <p class="text-center text-muted mb-4">
+          Platform untuk mengumpul barangan kitar semula daripada komuniti. Collector EcoRecycle
+          akan datang pickup dan pengguna menerima insentif.
+        </p>
+      </div>
 
-        <!-- Resit -->
-        <div class="card shadow-sm mb-4" id="receiptCard">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Resit Pickup</h5>
-            <p><strong>Username:</strong> ${user.username}</p>
-            <p><strong>Telefon:</strong> ${user.phone || '-'}</p>
-            <p><strong>Jenis Barang:</strong> ${request.material}</p>
-            <p><strong>Berat:</strong> ${request.weightKg} kg</p>
-            <hr>
-            <p class="fs-5"><strong>Insentif:</strong> RM ${totalRM}</p>
-            <p class="fs-5"><strong>Mata Ganjaran:</strong> ${totalPoints} points</p>
+            <h5 class="card-title mb-3 text-center">Log Masuk</h5>
+
+            <!-- ❗ PASTIKAN ID = loginForm -->
+            <form id="loginForm">
+              <div class="mb-3">
+                <label class="form-label">Username</label>
+                <!-- ❗ ID = username -->
+                <input type="text" class="form-control" id="username"
+                       autocomplete="username" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Nombor Telefon (WhatsApp)</label>
+                <!-- ❗ ID = phone -->
+                <input type="tel" class="form-control" id="phone"
+                       placeholder="contoh: 60123456789"
+                       autocomplete="tel" required>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Kata Laluan</label>
+                <!-- ❗ ID = password -->
+                <input type="password" class="form-control" id="password"
+                       autocomplete="current-password" required>
+              </div>
+
+              <button type="submit" class="btn btn-success w-100">
+                Log Masuk
+              </button>
+            </form>
+
           </div>
         </div>
-
-        <!-- Teks resit (boleh copy / simpan) -->
-        <div class="mb-3">
-          <label class="form-label">Teks Resit (copy / simpan)</label>
-          <textarea class="form-control" rows="7" readonly>${receiptText}</textarea>
-        </div>
-
-        <!-- Notifikasi Preview / WhatsApp -->
-        <h4 class="mb-3">Mesej WhatsApp ke Owner</h4>
-        <div class="mb-3">
-          <label class="form-label">Preview mesej WhatsApp</label>
-          <textarea class="form-control" rows="7" readonly>${waMessage}</textarea>
-        </div>
-
-        <p class="text-muted">
-          Bila tekan butang di bawah, WhatsApp akan terbuka dengan mesej di atas.
-          Bahagian <strong>"Alamat:"</strong> dibiarkan kosong supaya pengguna boleh isi alamat
-          lengkap sebelum tekan send.
-        </p>
-
-        <!-- Butang tindakan -->
-        <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
-          Buka WhatsApp &amp; Isi Alamat
-        </a>
-
-        <button class="btn btn-outline-secondary w-100 mb-2" onclick="downloadReceiptPdf()">
-          Muat Turun Resit (PDF)
-        </button>
-
-        <a href="request.html" class="btn btn-outline-success w-100 mt-2">Buat Request Baru</a>
       </div>
     </div>
-  `;
-}
+  </div>
 
-// --- Auto-generate & download PDF resit ---
-
-function downloadReceiptPdf() {
-  const reqData = getRequest();
-  if (!reqData) {
-    alert("Tiada data resit untuk dimuat turun.");
-    return;
-  }
-
-  const user = reqData.user;
-  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
-  const result = IncentiveCalculator.calculate(request);
-
-  const totalRM = result.totalIncentive.toFixed(2);
-  const totalPoints = result.points.toFixed(0);
-
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert("PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam calculate.html.");
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  let y = 10;
-  doc.setFontSize(16);
-  doc.text("Resit Pickup EcoRecycle", 10, y);
-  y += 10;
-
-  doc.setFontSize(12);
-  doc.text(`Username: ${user.username}`, 10, y);       y += 7;
-  doc.text(`Telefon: ${user.phone || "-"}`, 10, y);    y += 7;
-  doc.text(`Jenis barang: ${request.material}`, 10, y);y += 7;
-  doc.text(`Berat: ${request.weightKg} kg`, 10, y);    y += 7;
-
-  y += 3;
-  doc.text(`Insentif: RM ${totalRM}`, 10, y);          y += 7;
-  doc.text(`Mata ganjaran: ${totalPoints}`, 10, y);
-
-  y += 10;
-  doc.text("Terima kasih kerana menyokong kitar semula.", 10, y);
-
-  doc.save("Resit_EcoRecycle.pdf");
-}
-
-// --- Attach events based on current page ---
-
-document.addEventListener('DOMContentLoaded', () => {
-  const loginForm = document.getElementById('loginForm');
-  if (loginForm) {
-    loginForm.addEventListener('submit', handleLogin);
-  }
-
-  const requestForm = document.getElementById('requestForm');
-  if (requestForm) {
-    const user = getUser();
-    const welcomeText = document.getElementById('welcomeText');
-    if (user && welcomeText) {
-      welcomeText.textContent = `Hai, ${user.username}. Sila isi maklumat pickup.`;
-    }
-    requestForm.addEventListener('submit', handleRequestSubmit);
-  }
-
-  const calcContainer = document.getElementById('calcContainer');
-  if (calcContainer) {
-    displayCalculation();
-  }
-});
+  <!-- load JS -->
+  <script src="app.js?v=3"></script>
+</body>
+</html>
