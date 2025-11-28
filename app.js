@@ -1,23 +1,22 @@
-// =========================
-//  KONSTAN GLOBAL SISTEM
-// =========================
-const RATE_PER_KG = 0.30;     // RM per kg
-const POINTS_PER_KG = 10;     // points per kg
+// ====================================
+//  KONSTANT SISTEM
+// ====================================
+const RATE_PER_KG = 0.30;      // RM per kg
+const POINTS_PER_KG = 10;      // points per kg
 
-// Nombor WhatsApp owner EcoRecycle (format: 60 + nombor, tanpa + dan tanpa 0 depan)
-const ADMIN_WA_NUMBER = "60123456789"; // <-- TUKAR IKUT OWNER SEBENAR
+// Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
+const ADMIN_WA_NUMBER = "60123456789"; // TUKAR IKUT OWNER SEBENAR
 
 
-// =========================
-//  OOP CLASSES
-// =========================
+// ====================================
+//  KELAS OOP
+// ====================================
 
 class User {
-  // Untuk kes lama (name/email) dan baru (username)
   constructor(username, phone, password) {
     this.username = username;
     this.phone = phone;
-    this.password = password; // hanya untuk demo, bukan keselamatan sebenar
+    this.password = password; // untuk demo sahaja
   }
 }
 
@@ -38,9 +37,9 @@ class IncentiveCalculator {
 }
 
 
-// =========================
+// ====================================
 //  HELPER – LOCALSTORAGE
-// =========================
+// ====================================
 
 function saveUser(user) {
   localStorage.setItem("eco_user", JSON.stringify(user));
@@ -60,16 +59,16 @@ function getRequest() {
   return data ? JSON.parse(data) : null;
 }
 
-// Helper untuk nama paparan (fallback kalau guna versi lama)
+// Nama paparan untuk elak undefined
 function getDisplayName(user) {
   if (!user) return "pengguna";
   return user.username || user.name || user.email || "pengguna";
 }
 
 
-// =========================
+// ====================================
 //  HANDLER: LOGIN
-// =========================
+// ====================================
 
 function handleLogin(event) {
   event.preventDefault();
@@ -95,14 +94,14 @@ function handleLogin(event) {
   const user = new User(username, phone, password);
   saveUser(user);
 
-  // Pergi ke halaman request
+  // Pergi ke halaman request pickup
   window.location.href = "request.html";
 }
 
 
-// =========================
+// ====================================
 //  HANDLER: REQUEST PICKUP
-// =========================
+// ====================================
 
 function handleRequestSubmit(event) {
   event.preventDefault();
@@ -129,7 +128,6 @@ function handleRequestSubmit(event) {
     alert("Sila pilih jenis barangan kitar semula.");
     return;
   }
-
   if (isNaN(weight) || weight <= 0) {
     alert("Sila masukkan anggaran berat yang sah (lebih daripada 0).");
     return;
@@ -143,15 +141,15 @@ function handleRequestSubmit(event) {
 }
 
 
-// =========================
+// ====================================
 //  PAPAR RESIT & WHATSAPP
-// =========================
+// ====================================
 
 function displayCalculation() {
   const container = document.getElementById("calcContainer");
   const reqData = getRequest();
 
-  if (!container) return; // keselamatan
+  if (!container) return; // kalau page lain
 
   if (!reqData) {
     container.innerHTML =
@@ -167,7 +165,7 @@ function displayCalculation() {
   const totalRM = result.totalIncentive.toFixed(2);
   const totalPoints = result.points.toFixed(0);
 
-  // --- Teks resit untuk preview / copy ---
+  // Teks resit (untuk textarea)
   const receiptText = `
 RESIT PICKUP ECORCYCLE
 
@@ -181,7 +179,7 @@ Mata Ganjaran : ${totalPoints}
 Terima kasih kerana menyokong kitar semula.
   `.trim();
 
-  // --- Mesej WhatsApp ke OWNER (alamat sengaja kosong) ---
+  // Mesej WhatsApp ke OWNER
   const waMessage = `
 EcoRecycle Pickup Request
 
@@ -192,19 +190,15 @@ Berat: ${request.weightKg} kg
 Insentif: RM ${totalRM}
 Mata ganjaran: ${totalPoints}
 Alamat: 
-  `.trim(); // user akan isi alamat selepas "Alamat: "
+  `.trim();
 
-  const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(
-    waMessage
-  )}`;
+  const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
 
-  // --- HTML halaman resit ---
   container.innerHTML = `
     <div class="row justify-content-center">
       <div class="col-md-8">
         <h2 class="mb-4 text-center">Resit & WhatsApp</h2>
 
-        <!-- Resit -->
         <div class="card shadow-sm mb-4" id="receiptCard">
           <div class="card-body">
             <h5 class="card-title">Resit Pickup</h5>
@@ -218,13 +212,11 @@ Alamat:
           </div>
         </div>
 
-        <!-- Teks resit (boleh copy / simpan) -->
         <div class="mb-3">
           <label class="form-label">Teks Resit (copy / simpan)</label>
           <textarea class="form-control" rows="7" readonly>${receiptText}</textarea>
         </div>
 
-        <!-- Notifikasi Preview / WhatsApp -->
         <h4 class="mb-3">Mesej WhatsApp ke Owner</h4>
         <div class="mb-3">
           <label class="form-label">Preview mesej WhatsApp</label>
@@ -237,7 +229,6 @@ Alamat:
           lengkap sebelum tekan <em>send</em>.
         </p>
 
-        <!-- Butang tindakan -->
         <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
           Buka WhatsApp &amp; Isi Alamat
         </a>
@@ -255,93 +246,15 @@ Alamat:
 }
 
 
-// =========================
+// ====================================
 //  JANA & DOWNLOAD PDF RESIT
-// =========================
+// ====================================
 
 function downloadReceiptPdf() {
   const reqData = getRequest();
   if (!reqData) {
     alert("Tiada data resit untuk dimuat turun.");
-    return;
-  }
 
-  const user = reqData.user;
-  const displayName = getDisplayName(user);
-  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
-  const result = IncentiveCalculator.calculate(request);
-
-  const totalRM = result.totalIncentive.toFixed(2);
-  const totalPoints = result.points.toFixed(0);
-
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert(
-      "PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam calculate.html."
-    );
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  let y = 10;
-  doc.setFontSize(16);
-  doc.text("Resit Pickup EcoRecycle", 10, y);
-  y += 10;
-
-  doc.setFontSize(12);
-  doc.text(`Username: ${displayName}`, 10, y);
-  y += 7;
-  doc.text(`Telefon: ${user.phone || "-"}`, 10, y);
-  y += 7;
-  doc.text(`Jenis barang: ${request.material}`, 10, y);
-  y += 7;
-  doc.text(`Berat: ${request.weightKg} kg`, 10, y);
-  y += 7;
-
-  y += 3;
-  doc.text(`Insentif: RM ${totalRM}`, 10, y);
-  y += 7;
-  doc.text(`Mata ganjaran: ${totalPoints}`, 10, y);
-
-  y += 10;
-  doc.text("Terima kasih kerana menyokong kitar semula.", 10, y);
-
-  doc.save("Resit_EcoRecycle.pdf");
-}
-
-
-// =========================
-//  INITIALISASI MENGIKUT PAGE
-// =========================
-
-document.addEventListener("DOMContentLoaded", () => {
-  // 1) Login page
-  const loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", handleLogin);
-  }
-
-  // 2) Request page
-  const requestForm = document.getElementById("requestForm");
-  if (requestForm) {
-    // Set welcome text jika user wujud
-    const user = getUser();
-    const welcomeText = document.getElementById("welcomeText");
-    if (welcomeText) {
-      const displayName = getDisplayName(user);
-      welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
-    }
-
-    requestForm.addEventListener("submit", handleRequestSubmit);
-  }
-
-  // 3) Calculate / resit page
-  const calcContainer = document.getElementById("calcContainer");
-  if (calcContainer) {
-    displayCalculation();
-  }
-});
 
 
   <!-- load JS -->
