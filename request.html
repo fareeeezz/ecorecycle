@@ -8,11 +8,13 @@
 </head>
 <body class="app-body">
 
+  <!-- VIDEO BACKGROUND -->
   <video autoplay muted loop playsinline id="bgVideo">
     <source src="eco-bg.mp4" type="video/mp4">
   </video>
 
-   <header class="eco-header">
+  <!-- HEADER -->
+  <header class="eco-header">
     <div class="container d-flex justify-content-between align-items-center py-2">
       <div class="d-flex align-items-center gap-2">
         <div class="eco-logo-circle">♻️</div>
@@ -24,42 +26,95 @@
 
       <nav class="eco-nav d-none d-md-flex gap-3">
         <a href="index.html" class="eco-nav-link">Login</a>
-        <a href="request.html" class="eco-nav-link">Request Pickup</a>
+        <a href="request.html" class="eco-nav-link eco-nav-link-active">Request Pickup</a>
         <a href="calculate.html" class="eco-nav-link">Resit</a>
       </nav>
     </div>
   </header>
-</html>
 
-<div class="container py-5">
-  <h2 class="mb-4 text-center">Request Pickup</h2>
+  <!-- MAIN CONTENT -->
+  <main class="request-main container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
 
-  <div class="card shadow-sm mx-auto" style="max-width: 500px;">
-    <div class="card-body">
-      <p id="welcomeText" class="fw-semibold"></p>
-
-      <form id="requestForm">
-        <div class="mb-3">
-          <label class="form-label">Jenis Barang</label>
-          <select class="form-select" id="material" required>
-            <option value="">Pilih...</option>
-            <option value="Plastik">Plastik</option>
-            <option value="Kertas">Kertas</option>
-            <option value="Tin">Tin</option>
-          </select>
+        <!-- Tajuk utama -->
+        <div class="request-hero text-center mb-4">
+          <h1 class="request-title">Request Pickup</h1>
+          <p class="request-subtitle">
+            Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif & mata ganjaran secara automatik.
+          </p>
         </div>
 
-        <div class="mb-3">
-          <label class="form-label">Anggaran Berat (kg)</label>
-          <input type="number" step="0.1" min="0.1" class="form-control" id="weight" required>
+        <!-- Kad 2-kolum: info + form -->
+        <div class="card request-card shadow-lg">
+          <div class="row g-0 align-items-stretch">
+
+            <!-- Kiri: info / langkah / kadar -->
+            <div class="col-lg-5 request-card-left border-end">
+              <div class="p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <p id="welcomeText" class="fw-semibold mb-2">
+                    Hai, pengguna. Sila isi maklumat pickup.
+                  </p>
+                  <p class="small text-muted mb-3">
+                    Ikuti langkah di bawah sebelum hantar:
+                  </p>
+                  <ul class="request-steps small">
+                    <li>Pilih jenis barangan kitar semula.</li>
+                    <li>Masukkan anggaran berat dalam kilogram (kg).</li>
+                    <li>Semak sekali lagi, kemudian tekan butang <strong>Hantar &amp; Kira Insentif</strong>.</li>
+                  </ul>
+                </div>
+
+                <div class="request-rate-box mt-4">
+                  <div class="request-rate-label">Kadar Insentif Semasa</div>
+                  <div class="request-rate-value">RM 0.30 / kg</div>
+                  <div class="request-rate-points">+ 10 mata ganjaran / kg</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kanan: form -->
+            <div class="col-lg-7">
+              <div class="p-4">
+                <form id="requestForm">
+                  <div class="mb-3">
+                    <label class="form-label">Jenis Barang</label>
+                    <select class="form-select" id="material" required>
+                      <option value="">Pilih...</option>
+                      <option value="Plastik">Plastik</option>
+                      <option value="Kertas">Kertas</option>
+                      <option value="Tin">Tin</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Anggaran Berat (kg)</label>
+                    <input type="number" step="0.1" min="0.1"
+                           class="form-control" id="weight"
+                           placeholder="Contoh: 2.5" required>
+                  </div>
+
+                  <div class="alert alert-info small mb-3 request-hint">
+                    Tip: Gunakan anggaran berat paling hampir. Sistem hanya perlukan anggaran untuk
+                    kiraan awal insentif.
+                  </div>
+
+                  <button type="submit" class="btn btn-request w-100">
+                    Hantar &amp; Kira Insentif
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          </div>
         </div>
 
-        <button type="submit" class="btn btn-success w-100">Hantar & Kira Insentif</button>
-      </form>
+      </div>
     </div>
-  </div>
-</div>
+  </main>
 
-<script src="app.js"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
+
