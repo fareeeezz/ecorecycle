@@ -1,17 +1,17 @@
-// --- Constants (can be shown in report) ---
+// --- Constants ---
 const RATE_PER_KG = 0.30;   // RM per kg
 const POINTS_PER_KG = 10;   // points per kg
 
 // Nombor WhatsApp owner EcoRecycle (format: 60 + nombor, tanpa + dan tanpa 0 depan)
-const ADMIN_WA_NUMBER = "60182177535"; // TUKAR IKUT OWNER SEBENAR
+const ADMIN_WA_NUMBER = "60123456789"; // TUKAR IKUT OWNER SEBENAR
 
 // --- OOP CLASSES ---
 
 class User {
-  constructor(name, email, phone) {
-    this.name = name;
-    this.email = email;
+  constructor(username, phone, password) {
+    this.username = username;
     this.phone = phone;
+    this.password = password; // hanya untuk simulasi, tidak digunakan untuk auth sebenar
   }
 }
 
@@ -31,7 +31,7 @@ class IncentiveCalculator {
   }
 }
 
-// --- Helper functions (Model / Controller style) ---
+// --- Helper functions (Model / storage) ---
 
 function saveUser(user) {
   localStorage.setItem('eco_user', JSON.stringify(user));
@@ -55,11 +55,12 @@ function getRequest() {
 
 function handleLogin(event) {
   event.preventDefault();
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
 
-  const user = new User(name, email, phone);
+  const username = document.getElementById('username').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  const user = new User(username, phone, password);
   saveUser(user);
 
   window.location.href = 'request.html';
@@ -77,7 +78,7 @@ function handleRequestSubmit(event) {
   const material = document.getElementById('material').value;
   const weight = parseFloat(document.getElementById('weight').value);
 
-  const request = new PickupRequest(user, material, weight);
+  const request = new PickupRequest(user, weight ? material : material, weight);
   saveRequest(request);
 
   window.location.href = 'calculate.html';
@@ -105,8 +106,7 @@ function displayCalculation() {
   const receiptText = `
 RESIT PICKUP ECORCYCLE
 
-Nama          : ${user.name}
-Emel          : ${user.email}
+Username      : ${user.username}
 Telefon       : ${user.phone || '-'}
 Jenis Barang  : ${request.material}
 Berat         : ${request.weightKg} kg
@@ -120,8 +120,7 @@ Terima kasih kerana menyokong kitar semula.
   const waMessage = `
 EcoRecycle Pickup Request
 
-Nama: ${user.name}
-Emel: ${user.email}
+Username: ${user.username}
 Telefon: ${user.phone || '-'}
 Jenis barang: ${request.material}
 Berat: ${request.weightKg} kg
@@ -141,8 +140,7 @@ Alamat:
         <div class="card shadow-sm mb-4" id="receiptCard">
           <div class="card-body">
             <h5 class="card-title">Resit Pickup</h5>
-            <p><strong>Nama:</strong> ${user.name}</p>
-            <p><strong>Emel:</strong> ${user.email}</p>
+            <p><strong>Username:</strong> ${user.username}</p>
             <p><strong>Telefon:</strong> ${user.phone || '-'}</p>
             <p><strong>Jenis Barang:</strong> ${request.material}</p>
             <p><strong>Berat:</strong> ${request.weightKg} kg</p>
@@ -216,8 +214,7 @@ function downloadReceiptPdf() {
   y += 10;
 
   doc.setFontSize(12);
-  doc.text(`Nama: ${user.name}`, 10, y);               y += 7;
-  doc.text(`Emel: ${user.email}`, 10, y);              y += 7;
+  doc.text(`Username: ${user.username}`, 10, y);       y += 7;
   doc.text(`Telefon: ${user.phone || "-"}`, 10, y);    y += 7;
   doc.text(`Jenis barang: ${request.material}`, 10, y);y += 7;
   doc.text(`Berat: ${request.weightKg} kg`, 10, y);    y += 7;
@@ -232,7 +229,7 @@ function downloadReceiptPdf() {
   doc.save("Resit_EcoRecycle.pdf");
 }
 
-// --- Attach events based on current page (very simple MVC-style Controller) ---
+// --- Attach events based on current page ---
 
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
@@ -245,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = getUser();
     const welcomeText = document.getElementById('welcomeText');
     if (user && welcomeText) {
-      welcomeText.textContent = `Hai, ${user.name}. Sila isi maklumat pickup.`;
+      welcomeText.textContent = `Hai, ${user.username}. Sila isi maklumat pickup.`;
     }
     requestForm.addEventListener('submit', handleRequestSubmit);
   }
