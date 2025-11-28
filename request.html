@@ -37,19 +37,17 @@
     <div class="row justify-content-center">
       <div class="col-lg-10">
 
-        <!-- Tajuk utama -->
         <div class="request-hero text-center mb-4">
           <h1 class="request-title">Request Pickup</h1>
           <p class="request-subtitle">
-            Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif & mata ganjaran secara automatik.
+            Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif &amp; mata ganjaran secara automatik.
           </p>
         </div>
 
-        <!-- Kad 2-kolum: info + form -->
         <div class="card request-card shadow-lg">
           <div class="row g-0 align-items-stretch">
 
-            <!-- Kiri: info / langkah / kadar -->
+            <!-- KIRI: INFO -->
             <div class="col-lg-5 request-card-left border-end">
               <div class="p-4 h-100 d-flex flex-column justify-content-between">
                 <div>
@@ -74,7 +72,7 @@
               </div>
             </div>
 
-            <!-- Kanan: form -->
+            <!-- KANAN: FORM -->
             <div class="col-lg-7">
               <div class="p-4">
                 <form id="requestForm">
@@ -90,14 +88,20 @@
 
                   <div class="mb-3">
                     <label class="form-label">Anggaran Berat (kg)</label>
-                    <input type="number" step="0.1" min="0.1"
-                           class="form-control" id="weight"
-                           placeholder="Contoh: 2.5" required>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0.1"
+                      class="form-control"
+                      id="weight"
+                      placeholder="Contoh: 2.5"
+                      required
+                    >
                   </div>
 
                   <div class="alert alert-info small mb-3 request-hint">
-                    Tip: Gunakan anggaran berat paling hampir. Sistem hanya perlukan anggaran untuk
-                    kiraan awal insentif.
+                    Tip: Gunakan anggaran berat paling hampir. Sistem hanya perlukan anggaran
+                    untuk kiraan awal insentif.
                   </div>
 
                   <button type="submit" class="btn btn-request w-100">
@@ -114,7 +118,8 @@
     </div>
   </main>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js"></script>
 </body>
 </html>
+
 
