@@ -4,6 +4,11 @@
 const RATE_PER_KG = 0.30;      // RM per kg
 const POINTS_PER_KG = 10;      // points per kg
 
+// ===== LOGIN DEMO (CREDENTIAL TETAP) =====
+const DEMO_USERNAME = "upnm";
+const DEMO_PHONE    = "60123456789";  // tanpa +, tanpa space
+const DEMO_PASSWORD = "1234";
+
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
 const ADMIN_WA_NUMBER = "60123456789"; // TUKAR IKUT OWNER SEBENAR
 
@@ -71,18 +76,14 @@ function getDisplayName(user) {
 // ====================================
 
 function handleLogin(event) {
-  // supaya page tak reload default
   if (event) event.preventDefault();
-
-  // DEBUG: tengok dalam console sama ada fungsi ni dipanggil
-  console.log("handleLogin dipanggil");
 
   const usernameInput = document.getElementById("username");
   const phoneInput    = document.getElementById("phone");
   const passwordInput = document.getElementById("password");
 
   if (!usernameInput || !phoneInput || !passwordInput) {
-    alert("Ralat: ID input tak jumpa. Pastikan id='username', 'phone', 'password' dalam index.html.");
+    alert("Ralat: ID input login tak jumpa. Semak index.html.");
     return false;
   }
 
@@ -90,20 +91,39 @@ function handleLogin(event) {
   const phone    = phoneInput.value.trim();
   const password = passwordInput.value.trim();
 
-  // Kalau kosong, jangan bagi pergi
   if (!username || !phone || !password) {
     alert("Sila isi Username, Nombor Telefon dan Kata Laluan.");
     return false;
   }
 
-  // Simpan user dalam localStorage (OOP class User)
+  // Normalise untuk check:
+  const usernameNormalized = username.toLowerCase();
+  const phoneNormalized    = phone.replace(/\D/g, ""); // buang +, space, dash
+
+  // ✅ SEMAK DENGAN CREDENTIAL TETAP
+  if (
+    usernameNormalized !== DEMO_USERNAME.toLowerCase() ||
+    phoneNormalized    !== DEMO_PHONE ||
+    password           !== DEMO_PASSWORD
+  ) {
+    alert(
+      "Username / nombor telefon / kata laluan tidak sah.\n\n" +
+      "Contoh login yang betul:\n" +
+      `Username: ${DEMO_USERNAME}\n` +
+      `Telefon : ${DEMO_PHONE}\n` +
+      `Kata laluan: ${DEMO_PASSWORD}`
+    );
+    return false;
+  }
+
+  // Kalau betul -> simpan user & redirect
   const user = new User(username, phone, password);
   saveUser(user);
 
-  // Redirect ke halaman request
   window.location.href = "request.html";
-  return false;   // pastikan form tak submit default
+  return false;
 }
+
 
 
 // ====================================
