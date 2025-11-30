@@ -9,6 +9,9 @@ const DEMO_USERNAME = "upnm";
 const DEMO_PHONE    = "60123456789";  // tanpa +, tanpa space
 const DEMO_PASSWORD = "1234";
 
+const DEMO_USERNAME = "aidil";
+const DEMO_PHONE    = "601111473069";  // tanpa +, tanpa space
+const DEMO_PASSWORD = "1234";
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
 const ADMIN_WA_NUMBER = "601111473069"; // TUKAR IKUT OWNER SEBENAR
 
