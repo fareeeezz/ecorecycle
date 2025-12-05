@@ -43,10 +43,23 @@ class IncentiveCalculator {
 
 
 // ====================================
-//  HELPER – SESSION STORAGE
-//  (bukan localStorage, supaya tak kekal)
+//  HELPER – SESSION STORAGE (bukan localStorage)
 // ====================================
 
+// flag login
+function setLoggedIn() {
+  sessionStorage.setItem("eco_logged_in", "1");
+}
+
+function isLoggedIn() {
+  return sessionStorage.getItem("eco_logged_in") === "1";
+}
+
+function clearLogin() {
+  sessionStorage.removeItem("eco_logged_in");
+}
+
+// user info
 function saveUser(user) {
   sessionStorage.setItem("eco_user", JSON.stringify(user));
 }
@@ -60,6 +73,7 @@ function clearUser() {
   sessionStorage.removeItem("eco_user");
 }
 
+// request info
 function saveRequest(request) {
   sessionStorage.setItem("eco_request", JSON.stringify(request));
 }
@@ -125,9 +139,10 @@ function handleLogin(event) {
     return false;
   }
 
-  // Kalau betul -> simpan user (dalam SESSION) & redirect
+  // Kalau betul -> simpan user (SESSION) & tanda logged in
   const user = new User(username, phone, password);
   saveUser(user);
+  setLoggedIn();
 
   window.location.href = "request.html";
   return false;
@@ -141,6 +156,12 @@ function handleLogin(event) {
 
 function handleRequestSubmit(event) {
   if (event) event.preventDefault();
+
+  if (!isLoggedIn()) {
+    alert("Anda perlu log masuk dahulu.");
+    window.location.href = "index.html";
+    return false;
+  }
 
   const user = getUser();
   if (!user) {
@@ -183,10 +204,17 @@ function handleRequestSubmit(event) {
 
 function displayCalculation() {
   const container = document.getElementById("calcContainer");
-  const reqData = getRequest();
 
   if (!container) return;
 
+  if (!isLoggedIn()) {
+    // kalau tak log in, jangan tunjuk resit
+    container.innerHTML =
+      '<p class="text-center">Anda perlu log masuk dahulu untuk melihat resit.</p>';
+    return;
+  }
+
+  const reqData = getRequest();
   if (!reqData) {
     container.innerHTML =
       '<p class="text-center">Tiada data request dijumpai. Sila buat request semula.</p>';
@@ -336,7 +364,6 @@ function downloadReceiptPdf() {
   const boxHeight = 90;
   const boxWidth = pageWidth - 2 * margin;
 
-  // kotak dengan bucu bulat
   doc.roundedRect(margin, boxTop, boxWidth, boxHeight, 3, 3);
 
   let textY = boxTop + 12;
@@ -368,7 +395,6 @@ function downloadReceiptPdf() {
   doc.text(`Insentif      : RM ${totalRM}`, textX, textY);   textY += 7;
   doc.text(`Mata ganjaran : ${totalPoints} points`, textX, textY);
 
-  // Nota bawah
   y = boxTop + boxHeight + 15;
   doc.setFont("helvetica", "italic");
   doc.setFontSize(10);
@@ -378,7 +404,6 @@ function downloadReceiptPdf() {
     y
   );
 
-  // Optional: footer kecil
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text(
@@ -387,14 +412,13 @@ function downloadReceiptPdf() {
     pageHeight - 15
   );
 
-  // ✅ Simpan sebagai fail PDF A4
   doc.save("Resit_EcoRecycle.pdf");
 }
 
 
 
 // ====================================
-//  INIT – IKUT PAGE + GUARD LOGIN
+//  INIT – GUARD LOGIN + ATTACH EVENT
 // ====================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -406,32 +430,32 @@ document.addEventListener("DOMContentLoaded", function () {
   const isRequestPage = !!requestForm;
   const isResitPage   = !!calcContainer;
 
-  // ❗ Setiap kali buka login page → anggap LOGOUT
+  // ❗ SETIAP KALI MASUK LOGIN PAGE → ANGGAP LOGOUT
   if (isLoginPage) {
+    clearLogin();
     clearUser();
     clearRequest();
   }
 
-  const user = getUser(); // baca selepas kemungkinan clear di atas
+  const loggedIn = isLoggedIn();
+  const user = getUser();
 
-  // ❗ GUARD: kalau di Request atau Resit, tapi tak log in → paksa ke index.html
-  if (!user && (isRequestPage || isResitPage)) {
-    alert("Sila log masuk terlebih dahulu sebelum mengakses halaman ini.");
+  // ❗ GUARD: kalau di Request atau Resit, tapi tak log in → block + redirect
+  if (!loggedIn && (isRequestPage || isResitPage)) {
+    alert("Anda perlu log masuk dahulu.");
     window.location.href = "index.html";
     return;
   }
 
   // LOGIN PAGE
   if (loginForm) {
-    // HTML sudah ada onsubmit="return handleLogin(event);"
-    // tapi tak apa juga attach listener di sini.
     loginForm.addEventListener("submit", handleLogin);
   }
 
   // REQUEST PAGE
   if (requestForm) {
     const welcomeText = document.getElementById("welcomeText");
-    if (welcomeText) {
+    if (welcomeText && user) {
       const displayName = getDisplayName(user);
       welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
     }
