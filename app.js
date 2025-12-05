@@ -9,9 +9,8 @@ const DEMO_USERNAME = "upnm";
 const DEMO_PHONE    = "60123456789";  // tanpa +, tanpa space
 const DEMO_PASSWORD = "1234";
 
-
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
-const ADMIN_WA_NUMBER = "601111473069"; // TUKAR IKUT OWNER SEBENAR
+const ADMIN_WA_NUMBER = "601111473069";
 
 
 // ====================================
@@ -44,25 +43,34 @@ class IncentiveCalculator {
 
 
 // ====================================
-//  HELPER – LOCALSTORAGE
+//  HELPER – SESSION STORAGE
+//  (bukan localStorage, supaya tak kekal)
 // ====================================
 
 function saveUser(user) {
-  localStorage.setItem("eco_user", JSON.stringify(user));
+  sessionStorage.setItem("eco_user", JSON.stringify(user));
 }
 
 function getUser() {
-  const data = localStorage.getItem("eco_user");
+  const data = sessionStorage.getItem("eco_user");
   return data ? JSON.parse(data) : null;
+}
+
+function clearUser() {
+  sessionStorage.removeItem("eco_user");
 }
 
 function saveRequest(request) {
-  localStorage.setItem("eco_request", JSON.stringify(request));
+  sessionStorage.setItem("eco_request", JSON.stringify(request));
 }
 
 function getRequest() {
-  const data = localStorage.getItem("eco_request");
+  const data = sessionStorage.getItem("eco_request");
   return data ? JSON.parse(data) : null;
+}
+
+function clearRequest() {
+  sessionStorage.removeItem("eco_request");
 }
 
 // Nama paparan untuk elak undefined
@@ -117,7 +125,7 @@ function handleLogin(event) {
     return false;
   }
 
-  // Kalau betul -> simpan user & redirect
+  // Kalau betul -> simpan user (dalam SESSION) & redirect
   const user = new User(username, phone, password);
   saveUser(user);
 
@@ -305,8 +313,8 @@ function downloadReceiptPdf() {
     format: "a4"
   });
 
-  const pageWidth  = doc.internal.pageSize.getWidth();   // ~210 mm
-  const pageHeight = doc.internal.pageSize.getHeight();  // ~297 mm
+  const pageWidth  = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
 
   let y = margin;
@@ -390,9 +398,6 @@ function downloadReceiptPdf() {
 // ====================================
 
 document.addEventListener("DOMContentLoaded", function () {
-  // check user dulu
-  const user = getUser();
-
   const loginForm     = document.getElementById("loginForm");
   const requestForm   = document.getElementById("requestForm");
   const calcContainer = document.getElementById("calcContainer");
@@ -401,17 +406,25 @@ document.addEventListener("DOMContentLoaded", function () {
   const isRequestPage = !!requestForm;
   const isResitPage   = !!calcContainer;
 
+  // ❗ Setiap kali buka login page → anggap LOGOUT
+  if (isLoginPage) {
+    clearUser();
+    clearRequest();
+  }
+
+  const user = getUser(); // baca selepas kemungkinan clear di atas
+
   // ❗ GUARD: kalau di Request atau Resit, tapi tak log in → paksa ke index.html
   if (!user && (isRequestPage || isResitPage)) {
     alert("Sila log masuk terlebih dahulu sebelum mengakses halaman ini.");
     window.location.href = "index.html";
-    return; // berhenti, jangan sambung attach event lain
+    return;
   }
 
   // LOGIN PAGE
   if (loginForm) {
-    // kau dah ada onsubmit="return handleLogin(event);" dalam HTML,
-    // tapi tak salah juga attach listener di sini (akan panggil fungsi sama).
+    // HTML sudah ada onsubmit="return handleLogin(event);"
+    // tapi tak apa juga attach listener di sini.
     loginForm.addEventListener("submit", handleLogin);
   }
 
