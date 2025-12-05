@@ -132,13 +132,13 @@ function handleLogin(event) {
 // ====================================
 
 function handleRequestSubmit(event) {
-  event.preventDefault();
+  if (event) event.preventDefault();
 
   const user = getUser();
   if (!user) {
     alert("Sesi tamat atau belum log masuk. Sila log masuk semula.");
     window.location.href = "index.html";
-    return;
+    return false;
   }
 
   const materialEl = document.getElementById("material");
@@ -146,7 +146,7 @@ function handleRequestSubmit(event) {
 
   if (!materialEl || !weightEl) {
     alert("Ralat pada borang request. Sila refresh halaman.");
-    return;
+    return false;
   }
 
   const material = materialEl.value;
@@ -154,17 +154,18 @@ function handleRequestSubmit(event) {
 
   if (!material) {
     alert("Sila pilih jenis barangan kitar semula.");
-    return;
+    return false;
   }
   if (isNaN(weight) || weight <= 0) {
     alert("Sila masukkan anggaran berat yang sah (lebih daripada 0).");
-    return;
+    return false;
   }
 
   const request = new PickupRequest(user, material, weight);
   saveRequest(request);
 
   window.location.href = "calculate.html";
+  return false;
 }
 
 
@@ -385,21 +386,37 @@ function downloadReceiptPdf() {
 
 
 // ====================================
-//  INIT – IKUT PAGE
+//  INIT – IKUT PAGE + GUARD LOGIN
 // ====================================
 
 document.addEventListener("DOMContentLoaded", function () {
+  // check user dulu
+  const user = getUser();
+
+  const loginForm     = document.getElementById("loginForm");
+  const requestForm   = document.getElementById("requestForm");
+  const calcContainer = document.getElementById("calcContainer");
+
+  const isLoginPage   = !!loginForm;
+  const isRequestPage = !!requestForm;
+  const isResitPage   = !!calcContainer;
+
+  // ❗ GUARD: kalau di Request atau Resit, tapi tak log in → paksa ke index.html
+  if (!user && (isRequestPage || isResitPage)) {
+    alert("Sila log masuk terlebih dahulu sebelum mengakses halaman ini.");
+    window.location.href = "index.html";
+    return; // berhenti, jangan sambung attach event lain
+  }
 
   // LOGIN PAGE
-  const loginForm = document.getElementById("loginForm");
   if (loginForm) {
+    // kau dah ada onsubmit="return handleLogin(event);" dalam HTML,
+    // tapi tak salah juga attach listener di sini (akan panggil fungsi sama).
     loginForm.addEventListener("submit", handleLogin);
   }
 
   // REQUEST PAGE
-  const requestForm = document.getElementById("requestForm");
   if (requestForm) {
-    const user = getUser();
     const welcomeText = document.getElementById("welcomeText");
     if (welcomeText) {
       const displayName = getDisplayName(user);
@@ -409,9 +426,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // RESIT PAGE
-  const calcContainer = document.getElementById("calcContainer");
   if (calcContainer) {
     displayCalculation();
   }
 });
-
