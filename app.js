@@ -4,13 +4,8 @@
 const RATE_PER_KG = 0.30;      // RM per kg
 const POINTS_PER_KG = 10;      // points per kg
 
-// ===== LOGIN DEMO (CREDENTIAL TETAP) =====
-const DEMO_USERNAME = "upnm";
-const DEMO_PHONE    = "60123456789";  // tanpa +, tanpa space
-const DEMO_PASSWORD = "1234";
-
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
-const ADMIN_WA_NUMBER = "601111473069";
+const ADMIN_WA_NUMBER = "601111473069"; // tukar kalau perlu
 
 
 // ====================================
@@ -43,25 +38,55 @@ class IncentiveCalculator {
 
 
 // ====================================
-//  HELPER – SESSION STORAGE (bukan localStorage)
+//  REGISTERED USERS (localStorage)
+//  – kekal sebagai database mini
 // ====================================
 
-// flag login
-function setLoggedIn() {
+function getRegisteredUsers() {
+  try {
+    const data = localStorage.getItem("eco_users");
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveRegisteredUsers(users) {
+  localStorage.setItem("eco_users", JSON.stringify(users));
+}
+
+function addRegisteredUser(user) {
+  const users = getRegisteredUsers();
+  users.push(user);
+  saveRegisteredUsers(users);
+}
+
+function findUserByCredentials(username, phone, password) {
+  const users = getRegisteredUsers();
+  const unameNorm = (username || "").trim().toLowerCase();
+  const phoneNorm = (phone || "").replace(/\D/g, "");
+  return (
+    users.find(u =>
+      (u.username || "").trim().toLowerCase() === unameNorm &&
+      (u.phone || "").replace(/\D/g, "") === phoneNorm &&
+      u.password === password
+    ) || null
+  );
+}
+
+
+// ====================================
+//  SESSION LOGIN (sessionStorage)
+//  – tak kekal, hilang bila tutup tab / balik login
+// ====================================
+
+function setLoggedIn(user) {
   sessionStorage.setItem("eco_logged_in", "1");
+  sessionStorage.setItem("eco_user", JSON.stringify(user));
 }
 
 function isLoggedIn() {
   return sessionStorage.getItem("eco_logged_in") === "1";
-}
-
-function clearLogin() {
-  sessionStorage.removeItem("eco_logged_in");
-}
-
-// user info
-function saveUser(user) {
-  sessionStorage.setItem("eco_user", JSON.stringify(user));
 }
 
 function getUser() {
@@ -69,11 +94,13 @@ function getUser() {
   return data ? JSON.parse(data) : null;
 }
 
-function clearUser() {
+function clearLoginSession() {
+  sessionStorage.removeItem("eco_logged_in");
   sessionStorage.removeItem("eco_user");
+  sessionStorage.removeItem("eco_request");
 }
 
-// request info
+// REQUEST INFO (session)
 function saveRequest(request) {
   sessionStorage.setItem("eco_request", JSON.stringify(request));
 }
@@ -91,6 +118,54 @@ function clearRequest() {
 function getDisplayName(user) {
   if (!user) return "pengguna";
   return user.username || user.name || user.email || "pengguna";
+}
+
+
+// ====================================
+//  HANDLER: SIGN UP
+// ====================================
+
+function handleSignup(event) {
+  event.preventDefault();
+
+  const usernameInput = document.getElementById("signupUsername");
+  const phoneInput    = document.getElementById("signupPhone");
+  const passwordInput = document.getElementById("signupPassword");
+
+  if (!usernameInput || !phoneInput || !passwordInput) {
+    alert("Ralat: ID input sign up tak jumpa. Semak signup.html.");
+    return false;
+  }
+
+  const username = usernameInput.value.trim();
+  const phone    = phoneInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  if (!username || !phone || !password) {
+    alert("Sila isi semua ruangan (username, nombor telefon, kata laluan).");
+    return false;
+  }
+
+  const unameNorm = username.toLowerCase();
+  const phoneNorm = phone.replace(/\D/g, "");
+
+  const users = getRegisteredUsers();
+  const duplicate = users.find(u =>
+    (u.username || "").trim().toLowerCase() === unameNorm ||
+    (u.phone || "").replace(/\D/g, "") === phoneNorm
+  );
+
+  if (duplicate) {
+    alert("Username atau nombor telefon sudah digunakan. Sila pilih yang lain.");
+    return false;
+  }
+
+  const newUser = { username, phone, password };
+  addRegisteredUser(newUser);
+
+  alert("Pendaftaran berjaya! Sila log masuk menggunakan akaun yang baru.");
+  window.location.href = "index.html";
+  return false;
 }
 
 
@@ -119,30 +194,14 @@ function handleLogin(event) {
     return false;
   }
 
-  // Normalise untuk check:
-  const usernameNormalized = username.toLowerCase();
-  const phoneNormalized    = phone.replace(/\D/g, ""); // buang +, space, dash
-
-  // ✅ SEMAK DENGAN CREDENTIAL TETAP
-  if (
-    usernameNormalized !== DEMO_USERNAME.toLowerCase() ||
-    phoneNormalized    !== DEMO_PHONE ||
-    password           !== DEMO_PASSWORD
-  ) {
-    alert(
-      "Username / nombor telefon / kata laluan tidak sah.\n\n" +
-      "Contoh login yang betul:\n" +
-      `Username: ${DEMO_USERNAME}\n` +
-      `Telefon : ${DEMO_PHONE}\n` +
-      `Kata laluan: ${DEMO_PASSWORD}`
-    );
+  const user = findUserByCredentials(username, phone, password);
+  if (!user) {
+    alert("Akaun tidak dijumpai atau kata laluan salah.\nSila pastikan anda sudah Sign Up.");
     return false;
   }
 
-  // Kalau betul -> simpan user (SESSION) & tanda logged in
-  const user = new User(username, phone, password);
-  saveUser(user);
-  setLoggedIn();
+  // Simpan dalam SESSION sahaja (bukan localStorage)
+  setLoggedIn(user);
 
   window.location.href = "request.html";
   return false;
@@ -204,11 +263,9 @@ function handleRequestSubmit(event) {
 
 function displayCalculation() {
   const container = document.getElementById("calcContainer");
-
   if (!container) return;
 
   if (!isLoggedIn()) {
-    // kalau tak log in, jangan tunjuk resit
     container.innerHTML =
       '<p class="text-center">Anda perlu log masuk dahulu untuk melihat resit.</p>';
     return;
@@ -309,7 +366,7 @@ Alamat:
 
 
 // ====================================
-//  DOWNLOAD PDF RESIT
+//  DOWNLOAD PDF RESIT (A4)
 // ====================================
 
 function downloadReceiptPdf() {
@@ -334,7 +391,6 @@ function downloadReceiptPdf() {
 
   const { jsPDF } = window.jspdf;
 
-  // ✅ A4 portrait, unit mm
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -347,7 +403,6 @@ function downloadReceiptPdf() {
 
   let y = margin;
 
-  // Tajuk besar tengah
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
   doc.text("Resit Pickup EcoRecycle", pageWidth / 2, y, { align: "center" });
@@ -359,7 +414,6 @@ function downloadReceiptPdf() {
   doc.text(`Tarikh: ${tarikh}`, margin, y);
   y += 10;
 
-  // Kotak info utama
   const boxTop = y;
   const boxHeight = 90;
   const boxWidth = pageWidth - 2 * margin;
@@ -416,25 +470,24 @@ function downloadReceiptPdf() {
 }
 
 
-
 // ====================================
 //  INIT – GUARD LOGIN + ATTACH EVENT
 // ====================================
 
 document.addEventListener("DOMContentLoaded", function () {
   const loginForm     = document.getElementById("loginForm");
+  const signupForm    = document.getElementById("signupForm");
   const requestForm   = document.getElementById("requestForm");
   const calcContainer = document.getElementById("calcContainer");
 
   const isLoginPage   = !!loginForm;
+  const isSignupPage  = !!signupForm;
   const isRequestPage = !!requestForm;
   const isResitPage   = !!calcContainer;
 
-  // ❗ SETIAP KALI MASUK LOGIN PAGE → ANGGAP LOGOUT
+  // ❗ SETIAP KALI MASUK LOGIN PAGE → ANGGAP LOGOUT (lupa user & request)
   if (isLoginPage) {
-    clearLogin();
-    clearUser();
-    clearRequest();
+    clearLoginSession();
   }
 
   const loggedIn = isLoggedIn();
@@ -447,8 +500,14 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  // SIGN UP PAGE
+  if (signupForm) {
+    signupForm.addEventListener("submit", handleSignup);
+  }
+
   // LOGIN PAGE
-  if (loginForm) {
+  if (loginForm && !loginForm.hasAttribute("onsubmit")) {
+    // backup: kalau satu hari nanti buang onsubmit dalam HTML
     loginForm.addEventListener("submit", handleLogin);
   }
 
