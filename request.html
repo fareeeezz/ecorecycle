@@ -42,7 +42,7 @@
           <h1 class="request-title">Request Pickup</h1>
           <p class="request-subtitle">
             Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif &amp; mata ganjaran
-            secara automatik mengikut jenis material dan berat.
+            secara automatik mengikut jenis material, berat dan lokasi pickup.
           </p>
         </div>
 
@@ -62,7 +62,8 @@
                   <ul class="request-steps small">
                     <li>Pilih jenis barangan kitar semula.</li>
                     <li>Masukkan anggaran berat dalam kilogram (kg).</li>
-                    <li>Semak sekali lagi, kemudian tekan butang <strong>Hantar &amp; Kira Insentif</strong>.</li>
+                    <li>Tekan butang <strong>Dapatkan lokasi saya</strong> untuk pin lokasi GPS (optional).</li>
+                    <li>Tekan <strong>Hantar &amp; Kira Insentif</strong>.</li>
                   </ul>
                 </div>
 
@@ -111,9 +112,33 @@
                     >
                   </div>
 
+                  <!-- LOKASI GPS -->
+                  <div class="mb-3">
+                    <label class="form-label">Lokasi Pickup (GPS)</label>
+                    <div class="d-flex gap-2 mb-2">
+                      <button type="button" class="btn btn-outline-success" id="btnGetLocation">
+                        Dapatkan lokasi saya
+                      </button>
+                    </div>
+                    <small class="text-muted d-block mb-1">
+                      Sistem akan menggunakan GPS telefon / komputer untuk menetapkan lokasi pickup.
+                      Jika tidak dibenarkan, anda masih boleh hantar tanpa GPS.
+                    </small>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="locationDisplay"
+                      readonly
+                      placeholder="Belum ada lokasi. Sila tekan butang di atas jika mahu pin lokasi."
+                    >
+                    <!-- simpan koordinat sebenar -->
+                    <input type="hidden" id="locationLat">
+                    <input type="hidden" id="locationLng">
+                  </div>
+
                   <div class="alert alert-info small mb-3 request-hint">
-                    Tip: Gunakan anggaran berat paling hampir. Sistem akan mengira insentif
-                    berdasarkan jenis material dan berat yang anda masukkan.
+                    Tip: Gunakan anggaran berat paling hampir. Jika anda pin GPS, collector boleh terus
+                    rujuk link Google Maps daripada resit / mesej WhatsApp.
                   </div>
 
                   <button type="submit" class="btn btn-request w-100">
