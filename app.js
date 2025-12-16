@@ -1,13 +1,13 @@
 // ====================================
 //  KONSTANT SISTEM
 // ====================================
-const RATE_PER_KG = 0.30;      // fallback RM per kg (kalau material tak jumpa)
+const RATE_PER_KG = 0.30;      // fallback RM per kg
 const POINTS_PER_KG = 10;      // fallback points per kg
 
-// KADAR MENGIKUT MATERIAL (boleh ubah macam "harga semasa")
+// KADAR MENGIKUT MATERIAL
 const MATERIAL_RATES = {
   "Plastik": {
-    rate: 0.30,       // RM/kg
+    rate: 0.30,
     pointsPerKg: 10
   },
   "Kertas": {
@@ -53,6 +53,7 @@ class PickupRequest {
     this.user = user;
     this.material = material;
     this.weightKg = weightKg;
+    // lokasi akan ditambah kemudian (request.location = {...})
   }
 }
 
@@ -67,7 +68,6 @@ class IncentiveCalculator {
     const totalIncentive = request.weightKg * info.rate;
     const points = request.weightKg * info.pointsPerKg;
 
-    // pulangkan sekali rate supaya boleh papar
     return {
       totalIncentive,
       points,
@@ -80,7 +80,6 @@ class IncentiveCalculator {
 
 // ====================================
 //  REGISTERED USERS (localStorage)
-//  – kekal sebagai database mini
 // ====================================
 
 function getRegisteredUsers() {
@@ -118,7 +117,6 @@ function findUserByCredentials(username, phone, password) {
 
 // ====================================
 //  SESSION LOGIN (sessionStorage)
-//  – tak kekal, hilang bila tutup tab / balik login
 // ====================================
 
 function setLoggedIn(user) {
@@ -155,7 +153,7 @@ function clearRequest() {
   sessionStorage.removeItem("eco_request");
 }
 
-// Nama paparan untuk elak undefined
+// Nama paparan
 function getDisplayName(user) {
   if (!user) return "pengguna";
   return user.username || user.name || user.email || "pengguna";
@@ -241,13 +239,47 @@ function handleLogin(event) {
     return false;
   }
 
-  // Simpan dalam SESSION sahaja (bukan localStorage)
   setLoggedIn(user);
-
   window.location.href = "request.html";
   return false;
 }
 
+
+// ====================================
+//  GPS / LOKASI PICKER
+// ====================================
+
+function initLocationPicker() {
+  const btn      = document.getElementById("btnGetLocation");
+  const display  = document.getElementById("locationDisplay");
+  const latInput = document.getElementById("locationLat");
+  const lngInput = document.getElementById("locationLng");
+
+  if (!btn || !display || !latInput || !lngInput) return;
+
+  if (!navigator.geolocation) {
+    display.value = "Peranti anda tidak menyokong GPS (geolocation).";
+    btn.disabled = true;
+    return;
+  }
+
+  btn.addEventListener("click", function () {
+    display.value = "Mengambil lokasi... sila benarkan akses GPS di pelayar.";
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        latInput.value = lat;
+        lngInput.value = lng;
+        display.value = `Lokasi ditetapkan: ${lat}, ${lng}`;
+      },
+      (err) => {
+        console.error(err);
+        display.value = "Gagal mendapatkan lokasi. Sila cuba lagi atau hantar tanpa GPS.";
+      }
+    );
+  });
+}
 
 
 // ====================================
@@ -271,7 +303,9 @@ function handleRequestSubmit(event) {
   }
 
   const materialEl = document.getElementById("material");
-  const weightEl = document.getElementById("weight");
+  const weightEl   = document.getElementById("weight");
+  const latInput   = document.getElementById("locationLat");
+  const lngInput   = document.getElementById("locationLng");
 
   if (!materialEl || !weightEl) {
     alert("Ralat pada borang request. Sila refresh halaman.");
@@ -279,7 +313,7 @@ function handleRequestSubmit(event) {
   }
 
   const material = materialEl.value;
-  const weight = parseFloat(weightEl.value);
+  const weight   = parseFloat(weightEl.value);
 
   if (!material) {
     alert("Sila pilih jenis barangan kitar semula.");
@@ -291,8 +325,20 @@ function handleRequestSubmit(event) {
   }
 
   const request = new PickupRequest(user, material, weight);
-  saveRequest(request);
 
+  // baca lokasi jika ada
+  let location = null;
+  if (latInput && lngInput && latInput.value && lngInput.value) {
+    location = {
+      lat: parseFloat(latInput.value),
+      lng: parseFloat(lngInput.value)
+    };
+  }
+  if (location) {
+    request.location = location;
+  }
+
+  saveRequest(request);
   window.location.href = "calculate.html";
   return false;
 }
@@ -321,13 +367,33 @@ function displayCalculation() {
 
   const user = reqData.user;
   const displayName = getDisplayName(user);
-  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
-  const result = IncentiveCalculator.calculate(request);
 
-  const totalRM = result.totalIncentive.toFixed(2);
-  const totalPoints = result.points.toFixed(0);
-  const ratePerKg = result.ratePerKg.toFixed(2);
-  const pointsPerKg = result.pointsPerKg.toFixed(0);
+  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
+  request.location = reqData.location || null;
+
+  const result = IncentiveCalculator.calculate(request);
+  const totalRM      = result.totalIncentive.toFixed(2);
+  const totalPoints  = result.points.toFixed(0);
+  const ratePerKg    = result.ratePerKg.toFixed(2);
+  const pointsPerKg  = result.pointsPerKg.toFixed(0);
+
+  // Lokasi
+  let locationLineText = "Lokasi pickup: (tiada GPS – pengguna tidak menetapkan lokasi)";
+  let locationWaLine   = "Lokasi: (tiada GPS – pengguna tidak menetapkan lokasi)";
+  let locationHtml     = `<p><strong>Lokasi pickup:</strong> Tiada (GPS tidak ditetapkan)</p>`;
+  let mapsUrl          = "";
+
+  if (request.location && request.location.lat && request.location.lng) {
+    const lat = request.location.lat;
+    const lng = request.location.lng;
+    mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+    locationLineText = `Lokasi pickup (GPS): ${lat}, ${lng}`;
+    locationWaLine   = `Lokasi (Google Maps): ${mapsUrl}`;
+    locationHtml     = `
+      <p><strong>Lokasi pickup (GPS):</strong> ${lat}, ${lng}</p>
+      <p><a href="${mapsUrl}" target="_blank">Buka di Google Maps</a></p>
+    `;
+  }
 
   const receiptText = `
 RESIT PICKUP ECORCYCLE
@@ -339,6 +405,7 @@ Berat         : ${request.weightKg} kg
 Kadar         : RM ${ratePerKg} / kg, ${pointsPerKg} mata / kg
 Insentif      : RM ${totalRM}
 Mata Ganjaran : ${totalPoints}
+${locationLineText}
 
 Terima kasih kerana menyokong kitar semula.
   `.trim();
@@ -353,7 +420,7 @@ Berat: ${request.weightKg} kg
 Kadar: RM ${ratePerKg} / kg
 Insentif: RM ${totalRM}
 Mata ganjaran: ${totalPoints}
-Alamat: 
+${locationWaLine}
   `.trim();
 
   const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
@@ -371,6 +438,7 @@ Alamat:
             <p><strong>Jenis Barang:</strong> ${request.material}</p>
             <p><strong>Berat:</strong> ${request.weightKg} kg</p>
             <p><strong>Kadar:</strong> RM ${ratePerKg} / kg, ${pointsPerKg} mata / kg</p>
+            ${locationHtml}
             <hr>
             <p class="fs-5"><strong>Insentif:</strong> RM ${totalRM}</p>
             <p class="fs-5"><strong>Mata Ganjaran:</strong> ${totalPoints} points</p>
@@ -379,23 +447,22 @@ Alamat:
 
         <div class="mb-3">
           <label class="form-label">Teks Resit (copy / simpan)</label>
-          <textarea class="form-control" rows="8" readonly>${receiptText}</textarea>
+          <textarea class="form-control" rows="9" readonly>${receiptText}</textarea>
         </div>
 
         <h4 class="mb-3">Mesej WhatsApp ke Owner</h4>
         <div class="mb-3">
           <label class="form-label">Preview mesej WhatsApp</label>
-          <textarea class="form-control" rows="8" readonly>${waMessage}</textarea>
+          <textarea class="form-control" rows="9" readonly>${waMessage}</textarea>
         </div>
 
         <p class="text-muted">
           Bila tekan butang di bawah, WhatsApp akan terbuka dengan mesej di atas.
-          Bahagian <strong>"Alamat:"</strong> dibiarkan kosong supaya pengguna boleh isi alamat
-          lengkap sebelum tekan <em>send</em>.
+          Collector boleh terus tekan link Google Maps jika GPS ditetapkan.
         </p>
 
         <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
-          Buka WhatsApp &amp; Isi Alamat
+          Buka WhatsApp &amp; Isi Maklumat Tambahan
         </a>
 
         <button class="btn btn-outline-secondary w-100 mb-2" onclick="downloadReceiptPdf()">
@@ -424,13 +491,20 @@ function downloadReceiptPdf() {
 
   const user = reqData.user;
   const displayName = getDisplayName(user);
-  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
-  const result = IncentiveCalculator.calculate(request);
 
-  const totalRM = result.totalIncentive.toFixed(2);
-  const totalPoints = result.points.toFixed(0);
-  const ratePerKg = result.ratePerKg.toFixed(2);
-  const pointsPerKg = result.pointsPerKg.toFixed(0);
+  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
+  request.location = reqData.location || null;
+
+  const result = IncentiveCalculator.calculate(request);
+  const totalRM      = result.totalIncentive.toFixed(2);
+  const totalPoints  = result.points.toFixed(0);
+  const ratePerKg    = result.ratePerKg.toFixed(2);
+  const pointsPerKg  = result.pointsPerKg.toFixed(0);
+
+  let locationPdfLine = "Lokasi: (tiada GPS)";
+  if (request.location && request.location.lat && request.location.lng) {
+    locationPdfLine = `Lokasi (GPS): ${request.location.lat}, ${request.location.lng}`;
+  }
 
   if (!window.jspdf || !window.jspdf.jsPDF) {
     alert("PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam calculate.html.");
@@ -463,7 +537,7 @@ function downloadReceiptPdf() {
   y += 10;
 
   const boxTop = y;
-  const boxHeight = 100;
+  const boxHeight = 110;
   const boxWidth = pageWidth - 2 * margin;
 
   doc.roundedRect(margin, boxTop, boxWidth, boxHeight, 3, 3);
@@ -485,9 +559,10 @@ function downloadReceiptPdf() {
   textY += 8;
 
   doc.setFont("helvetica", "normal");
-  doc.text(`Jenis barang : ${request.material}`, textX, textY);  textY += 7;
+  doc.text(`Jenis barang : ${request.material}`, textX, textY);   textY += 7;
   doc.text(`Berat        : ${request.weightKg} kg`, textX, textY); textY += 7;
   doc.text(`Kadar        : RM ${ratePerKg} / kg, ${pointsPerKg} mata / kg`, textX, textY); textY += 7;
+  doc.text(locationPdfLine, textX, textY); textY += 7;
 
   textY += 3;
   doc.setFont("helvetica", "bold");
@@ -534,7 +609,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const isRequestPage = !!requestForm;
   const isResitPage   = !!calcContainer;
 
-  // ❗ SETIAP KALI MASUK LOGIN PAGE → ANGGAP LOGOUT (lupa user & request)
+  // setiap kali buka login → anggap logout
   if (isLoginPage) {
     clearLoginSession();
   }
@@ -542,7 +617,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const loggedIn = isLoggedIn();
   const user = getUser();
 
-  // ❗ GUARD: kalau di Request atau Resit, tapi tak log in → block + redirect
+  // guard: kalau di Request atau Resit tapi tak log in
   if (!loggedIn && (isRequestPage || isResitPage)) {
     alert("Anda perlu log masuk dahulu.");
     window.location.href = "index.html";
@@ -566,6 +641,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const displayName = getDisplayName(user);
       welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
     }
+    initLocationPicker();
     requestForm.addEventListener("submit", handleRequestSubmit);
   }
 
