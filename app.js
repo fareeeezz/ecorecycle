@@ -493,6 +493,74 @@ ${locationWaLine}
   initRiderMap(request);
 }
 
+function initRiderMap(request) {
+  const mapDiv = document.getElementById("riderMap");
+  const infoP  = document.getElementById("riderInfo");
+  if (!mapDiv) return;
+
+  // Kalau Leaflet tak wujud
+  if (typeof L === "undefined") {
+    if (infoP) infoP.textContent = "Ralat: peta rider tidak dapat dimuatkan.";
+    return;
+  }
+
+  // Kalau user tak pin lokasi masa Request
+  if (!request.location || !request.location.lat || !request.location.lng) {
+    if (infoP) {
+      infoP.textContent =
+        "Lokasi pelanggan tiada (GPS tidak dipin di halaman Request). Peta rider tidak dapat dipaparkan.";
+    }
+    return;
+  }
+
+  const custLat = request.location.lat;
+  const custLng = request.location.lng;
+
+  // Set view pada lokasi pelanggan
+  const map = L.map("riderMap").setView([custLat, custLng], 14);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+
+  // Marker pelanggan
+  const customerMarker = L.marker([custLat, custLng]).addTo(map)
+    .bindPopup("Lokasi Pelanggan").openPopup();
+
+  // Rider mula +/- 1km dari pelanggan (simulasi)
+  const riderStart = [custLat + 0.01, custLng - 0.01];
+  const riderMarker = L.marker(riderStart).addTo(map)
+    .bindPopup("Rider EcoRecycle");
+
+  // Animasi rider bergerak ke pelanggan
+  let step = 0;
+  const totalSteps = 40;      // lagi besar, lagi perlahan
+  const intervalMs = 500;     // 0.5s setiap langkah
+
+  if (infoP) {
+    infoP.textContent =
+      "Rider EcoRecycle sedang bergerak dari pusat pengumpulan ke lokasi anda. (Simulasi pergerakan pada peta)";
+  }
+
+  const interval = setInterval(() => {
+    step++;
+    const t = step / totalSteps;  // 0 → 1
+    const lat = riderStart[0] + (custLat - riderStart[0]) * t;
+    const lng = riderStart[1] + (custLng - riderStart[1]) * t;
+    riderMarker.setLatLng([lat, lng]);
+
+    if (step >= totalSteps) {
+      clearInterval(interval);
+      riderMarker.bindPopup("Rider telah tiba!").openPopup();
+      if (infoP) {
+        infoP.textContent = "Rider EcoRecycle telah tiba di lokasi anda. (Simulasi)";
+      }
+    }
+  }, intervalMs);
+}
+
+
 
 // ====================================
 //  DOWNLOAD PDF RESIT (A4)
