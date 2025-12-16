@@ -1,8 +1,36 @@
 // ====================================
 //  KONSTANT SISTEM
 // ====================================
-const RATE_PER_KG = 0.30;      // RM per kg
-const POINTS_PER_KG = 10;      // points per kg
+const RATE_PER_KG = 0.30;      // fallback RM per kg (kalau material tak jumpa)
+const POINTS_PER_KG = 10;      // fallback points per kg
+
+// KADAR MENGIKUT MATERIAL (boleh ubah macam "harga semasa")
+const MATERIAL_RATES = {
+  "Plastik": {
+    rate: 0.30,       // RM/kg
+    pointsPerKg: 10
+  },
+  "Kertas": {
+    rate: 0.20,
+    pointsPerKg: 8
+  },
+  "Tin": {
+    rate: 0.80,
+    pointsPerKg: 15
+  },
+  "Kaca": {
+    rate: 0.10,
+    pointsPerKg: 5
+  },
+  "Elektronik": {
+    rate: 1.50,
+    pointsPerKg: 20
+  },
+  "Minyak Masak Terpakai": {
+    rate: 2.00,
+    pointsPerKg: 25
+  }
+};
 
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
 const ADMIN_WA_NUMBER = "601111473069"; // tukar kalau perlu
@@ -30,9 +58,22 @@ class PickupRequest {
 
 class IncentiveCalculator {
   static calculate(request) {
-    const totalIncentive = request.weightKg * RATE_PER_KG;
-    const points = request.weightKg * POINTS_PER_KG;
-    return { totalIncentive, points };
+    const info =
+      MATERIAL_RATES[request.material] || {
+        rate: RATE_PER_KG,
+        pointsPerKg: POINTS_PER_KG
+      };
+
+    const totalIncentive = request.weightKg * info.rate;
+    const points = request.weightKg * info.pointsPerKg;
+
+    // pulangkan sekali rate supaya boleh papar
+    return {
+      totalIncentive,
+      points,
+      ratePerKg: info.rate,
+      pointsPerKg: info.pointsPerKg
+    };
   }
 }
 
@@ -285,6 +326,8 @@ function displayCalculation() {
 
   const totalRM = result.totalIncentive.toFixed(2);
   const totalPoints = result.points.toFixed(0);
+  const ratePerKg = result.ratePerKg.toFixed(2);
+  const pointsPerKg = result.pointsPerKg.toFixed(0);
 
   const receiptText = `
 RESIT PICKUP ECORCYCLE
@@ -293,6 +336,7 @@ Username      : ${displayName}
 Telefon       : ${user.phone || "-"}
 Jenis Barang  : ${request.material}
 Berat         : ${request.weightKg} kg
+Kadar         : RM ${ratePerKg} / kg, ${pointsPerKg} mata / kg
 Insentif      : RM ${totalRM}
 Mata Ganjaran : ${totalPoints}
 
@@ -306,6 +350,7 @@ Username: ${displayName}
 Telefon: ${user.phone || "-"}
 Jenis barang: ${request.material}
 Berat: ${request.weightKg} kg
+Kadar: RM ${ratePerKg} / kg
 Insentif: RM ${totalRM}
 Mata ganjaran: ${totalPoints}
 Alamat: 
@@ -325,6 +370,7 @@ Alamat:
             <p><strong>Telefon:</strong> ${user.phone || "-"}</p>
             <p><strong>Jenis Barang:</strong> ${request.material}</p>
             <p><strong>Berat:</strong> ${request.weightKg} kg</p>
+            <p><strong>Kadar:</strong> RM ${ratePerKg} / kg, ${pointsPerKg} mata / kg</p>
             <hr>
             <p class="fs-5"><strong>Insentif:</strong> RM ${totalRM}</p>
             <p class="fs-5"><strong>Mata Ganjaran:</strong> ${totalPoints} points</p>
@@ -333,13 +379,13 @@ Alamat:
 
         <div class="mb-3">
           <label class="form-label">Teks Resit (copy / simpan)</label>
-          <textarea class="form-control" rows="7" readonly>${receiptText}</textarea>
+          <textarea class="form-control" rows="8" readonly>${receiptText}</textarea>
         </div>
 
         <h4 class="mb-3">Mesej WhatsApp ke Owner</h4>
         <div class="mb-3">
           <label class="form-label">Preview mesej WhatsApp</label>
-          <textarea class="form-control" rows="7" readonly>${waMessage}</textarea>
+          <textarea class="form-control" rows="8" readonly>${waMessage}</textarea>
         </div>
 
         <p class="text-muted">
@@ -383,6 +429,8 @@ function downloadReceiptPdf() {
 
   const totalRM = result.totalIncentive.toFixed(2);
   const totalPoints = result.points.toFixed(0);
+  const ratePerKg = result.ratePerKg.toFixed(2);
+  const pointsPerKg = result.pointsPerKg.toFixed(0);
 
   if (!window.jspdf || !window.jspdf.jsPDF) {
     alert("PDF library (jsPDF) tidak dimuatkan. Pastikan script jsPDF ada dalam calculate.html.");
@@ -415,7 +463,7 @@ function downloadReceiptPdf() {
   y += 10;
 
   const boxTop = y;
-  const boxHeight = 90;
+  const boxHeight = 100;
   const boxWidth = pageWidth - 2 * margin;
 
   doc.roundedRect(margin, boxTop, boxWidth, boxHeight, 3, 3);
@@ -428,7 +476,7 @@ function downloadReceiptPdf() {
   textY += 8;
 
   doc.setFont("helvetica", "normal");
-  doc.text(`Username   : ${displayName}`, textX, textY);  textY += 7;
+  doc.text(`Username   : ${displayName}`, textX, textY);      textY += 7;
   doc.text(`Telefon    : ${user.phone || "-"}`, textX, textY); textY += 7;
 
   textY += 3;
@@ -439,6 +487,7 @@ function downloadReceiptPdf() {
   doc.setFont("helvetica", "normal");
   doc.text(`Jenis barang : ${request.material}`, textX, textY);  textY += 7;
   doc.text(`Berat        : ${request.weightKg} kg`, textX, textY); textY += 7;
+  doc.text(`Kadar        : RM ${ratePerKg} / kg, ${pointsPerKg} mata / kg`, textX, textY); textY += 7;
 
   textY += 3;
   doc.setFont("helvetica", "bold");
@@ -446,7 +495,7 @@ function downloadReceiptPdf() {
   textY += 8;
 
   doc.setFont("helvetica", "normal");
-  doc.text(`Insentif      : RM ${totalRM}`, textX, textY);   textY += 7;
+  doc.text(`Insentif      : RM ${totalRM}`, textX, textY);          textY += 7;
   doc.text(`Mata ganjaran : ${totalPoints} points`, textX, textY);
 
   y = boxTop + boxHeight + 15;
@@ -501,18 +550,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // SIGN UP PAGE
-  if (signupForm) {
+  if (isSignupPage && signupForm) {
     signupForm.addEventListener("submit", handleSignup);
   }
 
   // LOGIN PAGE
-  if (loginForm && !loginForm.hasAttribute("onsubmit")) {
-    // backup: kalau satu hari nanti buang onsubmit dalam HTML
+  if (isLoginPage && loginForm && !loginForm.hasAttribute("onsubmit")) {
     loginForm.addEventListener("submit", handleLogin);
   }
 
   // REQUEST PAGE
-  if (requestForm) {
+  if (isRequestPage && requestForm) {
     const welcomeText = document.getElementById("welcomeText");
     if (welcomeText && user) {
       const displayName = getDisplayName(user);
@@ -522,7 +570,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // RESIT PAGE
-  if (calcContainer) {
+  if (isResitPage && calcContainer) {
     displayCalculation();
   }
 });
