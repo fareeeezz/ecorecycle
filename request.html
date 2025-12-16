@@ -24,13 +24,12 @@
         </div>
       </div>
 
-     <nav class="eco-nav d-none d-md-flex gap-3">
-  <a href="index.html" class="eco-nav-link">Login</a>
-  <a href="signup.html" class="eco-nav-link">Sign Up</a>
-  <a href="request.html" class="eco-nav-link eco-nav-link-active">Request Pickup</a>
-  <a href="calculate.html" class="eco-nav-link">Resit</a>
-</nav>
-
+      <nav class="eco-nav d-none d-md-flex gap-3">
+        <a href="index.html" class="eco-nav-link">Login</a>
+        <a href="signup.html" class="eco-nav-link">Sign Up</a>
+        <a href="request.html" class="eco-nav-link eco-nav-link-active">Request Pickup</a>
+        <a href="calculate.html" class="eco-nav-link">Resit</a>
+      </nav>
     </div>
   </header>
 
@@ -42,7 +41,8 @@
         <div class="request-hero text-center mb-4">
           <h1 class="request-title">Request Pickup</h1>
           <p class="request-subtitle">
-            Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif &amp; mata ganjaran secara automatik.
+            Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif &amp; mata ganjaran
+            secara automatik mengikut jenis material dan berat.
           </p>
         </div>
 
@@ -67,9 +67,16 @@
                 </div>
 
                 <div class="request-rate-box mt-4">
-                  <div class="request-rate-label">Kadar Insentif Semasa</div>
-                  <div class="request-rate-value">RM 0.30 / kg</div>
-                  <div class="request-rate-points">+ 10 mata ganjaran / kg</div>
+                  <div class="request-rate-label">Kadar Insentif Mengikut Material</div>
+                  <div class="request-rate-value">Contoh kadar semasa:</div>
+                  <div class="request-rate-points">
+                    Plastik: RM 0.30 / kg, 10 mata / kg<br>
+                    Kertas: RM 0.20 / kg, 8 mata / kg<br>
+                    Tin: RM 0.80 / kg, 15 mata / kg<br>
+                    Kaca: RM 0.10 / kg, 5 mata / kg<br>
+                    Elektronik: RM 1.50 / kg, 20 mata / kg<br>
+                    Minyak Masak Terpakai: RM 2.00 / kg, 25 mata / kg
+                  </div>
                 </div>
               </div>
             </div>
@@ -84,7 +91,10 @@
                       <option value="">Pilih...</option>
                       <option value="Plastik">Plastik</option>
                       <option value="Kertas">Kertas</option>
-                      <option value="Tin">Tin</option>
+                      <option value="Tin">Tin / Aluminium</option>
+                      <option value="Kaca">Kaca</option>
+                      <option value="Elektronik">Barangan Elektronik (e-waste)</option>
+                      <option value="Minyak Masak Terpakai">Minyak Masak Terpakai</option>
                     </select>
                   </div>
 
@@ -102,8 +112,8 @@
                   </div>
 
                   <div class="alert alert-info small mb-3 request-hint">
-                    Tip: Gunakan anggaran berat paling hampir. Sistem hanya perlukan anggaran
-                    untuk kiraan awal insentif.
+                    Tip: Gunakan anggaran berat paling hampir. Sistem akan mengira insentif
+                    berdasarkan jenis material dan berat yang anda masukkan.
                   </div>
 
                   <button type="submit" class="btn btn-request w-100">
@@ -123,5 +133,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
-
