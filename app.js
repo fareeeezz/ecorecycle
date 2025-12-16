@@ -361,14 +361,14 @@ function displayCalculation() {
 
   if (!isLoggedIn()) {
     container.innerHTML =
-      '<p class="text-center">Anda perlu log masuk dahulu untuk melihat resit.</p>';
+      '<p class="text-center">Anda perlu log masuk dahulu untuk melihat order.</p>';
     return;
   }
 
   const reqData = getRequest();
   if (!reqData) {
     container.innerHTML =
-      '<p class="text-center">Tiada data request dijumpai. Sila buat request semula.</p>';
+      '<p class="text-center">Tiada data order dijumpai. Sila buat request semula.</p>';
     return;
   }
 
@@ -403,7 +403,7 @@ function displayCalculation() {
   }
 
   const receiptText = `
-RESIT PICKUP ECORCYCLE
+ORDER PICKUP ECORCYCLE
 
 Username      : ${displayName}
 Telefon       : ${user.phone || "-"}
@@ -418,7 +418,7 @@ Terima kasih kerana menyokong kitar semula.
   `.trim();
 
   const waMessage = `
-EcoRecycle Pickup Request
+EcoRecycle Pickup Order
 
 Username: ${displayName}
 Telefon: ${user.phone || "-"}
@@ -435,11 +435,11 @@ ${locationWaLine}
   container.innerHTML = `
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <h2 class="mb-4 text-center">Resit & WhatsApp</h2>
+        <h2 class="mb-4 text-center">Maklumat Order & Rider</h2>
 
         <div class="card shadow-sm mb-4" id="receiptCard">
           <div class="card-body">
-            <h5 class="card-title">Resit Pickup</h5>
+            <h5 class="card-title">Order Pickup</h5>
             <p><strong>Username:</strong> ${displayName}</p>
             <p><strong>Telefon:</strong> ${user.phone || "-"}</p>
             <p><strong>Jenis Barang:</strong> ${request.material}</p>
@@ -453,7 +453,7 @@ ${locationWaLine}
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Teks Resit (copy / simpan)</label>
+          <label class="form-label">Teks Order (copy / simpan)</label>
           <textarea class="form-control" rows="9" readonly>${receiptText}</textarea>
         </div>
 
@@ -468,20 +468,29 @@ ${locationWaLine}
           Collector boleh terus tekan link Google Maps jika lokasi dipin pada peta.
         </p>
 
-        <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
+        <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-3">
           Buka WhatsApp &amp; Isi Maklumat Tambahan
         </a>
 
+        <h4 class="mb-2">Kedudukan Rider (Simulasi)</h4>
+        <p id="riderInfo" class="small text-muted mb-2">
+          Memuatkan peta rider...
+        </p>
+        <div id="riderMap" class="mb-4"></div>
+
         <button class="btn btn-outline-secondary w-100 mb-2" onclick="downloadReceiptPdf()">
-          Muat Turun Resit (PDF)
+          Muat Turun Order (PDF)
         </button>
 
         <a href="request.html" class="btn btn-outline-success w-100 mt-2">
-          Buat Request Baru
+          Buat Order / Request Baru
         </a>
       </div>
     </div>
   `;
+
+  // 🚚 lepas HTML dah render, baru init peta rider
+  initRiderMap(request);
 }
 
 
