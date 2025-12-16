@@ -53,7 +53,7 @@ class PickupRequest {
     this.user = user;
     this.material = material;
     this.weightKg = weightKg;
-    // lokasi akan ditambah kemudian (request.location = {...})
+    // this.location akan ditambah kemudian jika ada
   }
 }
 
@@ -246,38 +246,45 @@ function handleLogin(event) {
 
 
 // ====================================
-//  GPS / LOKASI PICKER
+//  MAP PICKER (Leaflet) – PIN LOKASI
 // ====================================
 
-function initLocationPicker() {
-  const btn      = document.getElementById("btnGetLocation");
-  const display  = document.getElementById("locationDisplay");
-  const latInput = document.getElementById("locationLat");
-  const lngInput = document.getElementById("locationLng");
+function initMapPicker() {
+  const mapDiv    = document.getElementById("map");
+  const display   = document.getElementById("locationDisplay");
+  const latInput  = document.getElementById("locationLat");
+  const lngInput  = document.getElementById("locationLng");
 
-  if (!btn || !display || !latInput || !lngInput) return;
+  if (!mapDiv || !display || !latInput || !lngInput) return;
 
-  if (!navigator.geolocation) {
-    display.value = "Peranti anda tidak menyokong GPS (geolocation).";
-    btn.disabled = true;
+  if (typeof L === "undefined") {
+    display.value = "Ralat: peta tidak dapat dimuatkan.";
     return;
   }
 
-  btn.addEventListener("click", function () {
-    display.value = "Mengambil lokasi... sila benarkan akses GPS di pelayar.";
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude.toFixed(6);
-        const lng = pos.coords.longitude.toFixed(6);
-        latInput.value = lat;
-        lngInput.value = lng;
-        display.value = `Lokasi ditetapkan: ${lat}, ${lng}`;
-      },
-      (err) => {
-        console.error(err);
-        display.value = "Gagal mendapatkan lokasi. Sila cuba lagi atau hantar tanpa GPS.";
-      }
-    );
+  // Default center: Kuala Lumpur
+  const map = L.map("map").setView([3.1390, 101.6869], 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+
+  let marker = null;
+
+  map.on("click", function(e) {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
+
+    if (marker) {
+      marker.setLatLng(e.latlng);
+    } else {
+      marker = L.marker(e.latlng).addTo(map);
+    }
+
+    latInput.value = lat;
+    lngInput.value = lng;
+    display.value = `Lokasi dipilih: ${lat}, ${lng}`;
   });
 }
 
@@ -326,7 +333,7 @@ function handleRequestSubmit(event) {
 
   const request = new PickupRequest(user, material, weight);
 
-  // baca lokasi jika ada
+  // baca lokasi dari pin map jika ada
   let location = null;
   if (latInput && lngInput && latInput.value && lngInput.value) {
     location = {
@@ -371,15 +378,15 @@ function displayCalculation() {
   const request = new PickupRequest(user, reqData.material, reqData.weightKg);
   request.location = reqData.location || null;
 
-  const result = IncentiveCalculator.calculate(request);
+  const result       = IncentiveCalculator.calculate(request);
   const totalRM      = result.totalIncentive.toFixed(2);
   const totalPoints  = result.points.toFixed(0);
   const ratePerKg    = result.ratePerKg.toFixed(2);
   const pointsPerKg  = result.pointsPerKg.toFixed(0);
 
   // Lokasi
-  let locationLineText = "Lokasi pickup: (tiada GPS – pengguna tidak menetapkan lokasi)";
-  let locationWaLine   = "Lokasi: (tiada GPS – pengguna tidak menetapkan lokasi)";
+  let locationLineText = "Lokasi pickup: (tiada GPS – pengguna tidak pin lokasi)";
+  let locationWaLine   = "Lokasi: (tiada GPS – pengguna tidak pin lokasi)";
   let locationHtml     = `<p><strong>Lokasi pickup:</strong> Tiada (GPS tidak ditetapkan)</p>`;
   let mapsUrl          = "";
 
@@ -458,7 +465,7 @@ ${locationWaLine}
 
         <p class="text-muted">
           Bila tekan butang di bawah, WhatsApp akan terbuka dengan mesej di atas.
-          Collector boleh terus tekan link Google Maps jika GPS ditetapkan.
+          Collector boleh terus tekan link Google Maps jika lokasi dipin pada peta.
         </p>
 
         <a href="${waUrl}" target="_blank" class="btn btn-success w-100 mb-2">
@@ -495,7 +502,7 @@ function downloadReceiptPdf() {
   const request = new PickupRequest(user, reqData.material, reqData.weightKg);
   request.location = reqData.location || null;
 
-  const result = IncentiveCalculator.calculate(request);
+  const result       = IncentiveCalculator.calculate(request);
   const totalRM      = result.totalIncentive.toFixed(2);
   const totalPoints  = result.points.toFixed(0);
   const ratePerKg    = result.ratePerKg.toFixed(2);
@@ -537,7 +544,7 @@ function downloadReceiptPdf() {
   y += 10;
 
   const boxTop = y;
-  const boxHeight = 110;
+  const boxHeight = 115;
   const boxWidth = pageWidth - 2 * margin;
 
   doc.roundedRect(margin, boxTop, boxWidth, boxHeight, 3, 3);
@@ -641,7 +648,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const displayName = getDisplayName(user);
       welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
     }
-    initLocationPicker();
+    initMapPicker();
     requestForm.addEventListener("submit", handleRequestSubmit);
   }
 
