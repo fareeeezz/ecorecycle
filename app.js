@@ -416,17 +416,24 @@ function handleRequestSubmit(event) {
     weightKg: weight
   });
 
-  // item tambahan dari request.html (class material-item + weight-item)
-  const extraMaterialEls = document.querySelectorAll(".material-item");
-  const extraWeightEls   = document.querySelectorAll(".weight-item");
+  // ✅ FIX: ambil hanya dari container multiItemContainer sahaja
+  const multiContainer = document.getElementById("multiItemContainer");
 
-  if (extraMaterialEls && extraWeightEls && extraMaterialEls.length > 0) {
+  const extraMaterialEls = multiContainer
+    ? multiContainer.querySelectorAll(".material-item")
+    : [];
+
+  const extraWeightEls = multiContainer
+    ? multiContainer.querySelectorAll(".weight-item")
+    : [];
+
+  if (extraMaterialEls && extraMaterialEls.length > 0) {
     for (let i = 0; i < extraMaterialEls.length; i++) {
       const m = (extraMaterialEls[i].value || "").trim();
       const w = parseFloat(extraWeightEls[i] ? extraWeightEls[i].value : "");
 
       // ignore row kosong
-      if (!m && (!w || isNaN(w))) continue;
+      if (!m && (isNaN(w) || !w)) continue;
 
       // kalau isi separuh -> error
       if (!m) {
@@ -445,10 +452,19 @@ function handleRequestSubmit(event) {
     }
   }
 
+  // optional: guard max 6 (1 utama + 5 tambahan)
+  if (items.length > 6) {
+    alert("Maksimum 6 jenis barang sahaja.");
+    return false;
+  }
+
   // ================================
   // VALIDASI DUPLICATE MATERIAL
   // ================================
-  const chosen = items.map(x => (x.material || "").trim()).filter(Boolean);
+  const chosen = items
+    .map(x => (x.material || "").trim())
+    .filter(m => m.length > 0);
+
   const seen = new Set();
   for (let i = 0; i < chosen.length; i++) {
     const key = chosen[i].toLowerCase();
@@ -930,7 +946,7 @@ document.addEventListener("DOMContentLoaded", function () {
     clearLoginSession();
   }
 
-  // ✅ NAVBAR RULES (ikut permintaan gambar)
+  // ✅ NAVBAR RULES
   updateEcoNavbar();
 
   const loggedIn = isLoggedIn();
