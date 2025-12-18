@@ -1,131 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>EcoRecycle – Request Pickup</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Request Pickup</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body class="app-body">
 
-  <!-- VIDEO BACKGROUND -->
-  <video autoplay muted loop playsinline id="bgVideo">
-    <source src="eco-bg.mp4" type="video/mp4">
-  </video>
+<header class="eco-header">
+  <div class="container d-flex justify-content-between py-2">
+    <div class="eco-title">EcoRecycle</div>
+    <nav>
+      <a href="index.html" class="eco-nav-link">Login</a>
+      <a href="signup.html" class="eco-nav-link">Sign Up</a>
+      <a href="request.html" class="eco-nav-link eco-nav-link-active">Request</a>
+      <a href="calculate.html" class="eco-nav-link">Resit</a>
+    </nav>
+  </div>
+</header>
 
-  <!-- HEADER -->
-  <header class="eco-header">
-    <div class="container d-flex justify-content-between align-items-center py-2">
-      <div class="d-flex align-items-center gap-2">
-        <div class="eco-logo-circle">♻️</div>
-        <div>
-          <div class="eco-title">EcoRecycle</div>
-          <div class="eco-subtitle">Pickup Kitar Semula Komuniti</div>
-        </div>
-      </div>
+<main class="container py-5">
+<form id="requestForm">
 
-      <nav class="eco-nav d-none d-md-flex gap-3">
-        <a href="index.html" class="eco-nav-link">Login</a>
-        <a href="signup.html" class="eco-nav-link">Sign Up</a>
-        <a href="request.html" class="eco-nav-link eco-nav-link-active">Request Pickup</a>
-        <a href="calculate.html" class="eco-nav-link">Order</a>
-      </nav>
-    </div>
-  </header>
+<h4>Senarai Barangan (Max 5)</h4>
 
-  <!-- MAIN CONTENT -->
-  <main class="request-main container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
+<div id="itemsContainer"></div>
 
-        <div class="request-hero text-center mb-4">
-          <h1 class="request-title">Request Pickup (Multi-Item)</h1>
-          <p class="request-subtitle">
-            Anda boleh tambah sehingga <strong>5 jenis</strong> barangan berbeza dalam satu order.
-          </p>
-        </div>
+<button type="button" class="btn btn-outline-success mb-3" onclick="addItem()">
++ Tambah Jenis Barang
+</button>
 
-        <div class="card request-card shadow-lg">
-          <div class="row g-0 align-items-stretch">
+<h4>Lokasi Pickup</h4>
+<div id="map" style="height:300px"></div>
+<input type="text" id="locationDisplay" class="form-control mt-2" readonly>
+<input type="hidden" id="locationLat">
+<input type="hidden" id="locationLng">
 
-            <!-- KIRI: INFO -->
-            <div class="col-lg-5 request-card-left border-end">
-              <div class="p-4 h-100 d-flex flex-column justify-content-between">
-                <div>
-                  <p id="welcomeText" class="fw-semibold mb-2">
-                    Hai, pengguna. Sila isi maklumat pickup.
-                  </p>
+<button class="btn btn-success w-100 mt-4">
+Hantar & Kira Insentif
+</button>
 
-                  <ul class="request-steps small">
-                    <li>Pilih jenis barang dan masukkan berat (kg).</li>
-                    <li>Tekan <strong>Tambah jenis barang</strong> untuk tambah item lain.</li>
-                    <li>Maksimum 5 jenis berbeza.</li>
-                    <li>Klik pada peta untuk pin lokasi pickup.</li>
-                    <li>Tekan <strong>Hantar &amp; Kira Insentif</strong>.</li>
-                  </ul>
-                </div>
+</form>
+</main>
 
-                <div class="request-rate-box mt-4">
-                  <div class="request-rate-label">KADAR INSENTIF MENGIKUT MATERIAL</div>
-                  <div class="small mt-2" id="rateList">
-                    <!-- app.js akan inject list kadar -->
-                  </div>
-                </div>
-              </div>
-            </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
 
-            <!-- KANAN: FORM -->
-            <div class="col-lg-7">
-              <div class="p-4">
-                <form id="requestForm">
+<script>
+let count = 0;
+function addItem() {
+  if (count >= 5) return alert("Max 5 item sahaja");
+  count++;
 
-                  <!-- MULTI ITEMS -->
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label fw-semibold mb-0">Senarai Barangan (Max 5)</label>
-                    <button type="button" class="btn btn-outline-success btn-sm" id="addItemBtn">
-                      + Tambah jenis barang
-                    </button>
-                  </div>
+  const div = document.createElement("div");
+  div.className = "item-row border p-3 mb-2";
+  div.innerHTML = `
+    <select class="form-select material mb-2">
+      <option value="">Pilih</option>
+      <option>Plastik</option>
+      <option>Kertas</option>
+      <option>Tin</option>
+      <option>Kaca</option>
+      <option>Elektronik</option>
+      <option>Minyak Masak Terpakai</option>
+    </select>
+    <input type="number" class="form-control weight" placeholder="kg" min="0.1" step="0.1">
+  `;
+  itemsContainer.appendChild(div);
+}
+document.addEventListener("DOMContentLoaded", addItem);
+</script>
 
-                  <div id="itemsContainer" class="mb-3">
-                    <!-- app.js akan inject item row -->
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label">Lokasi Pickup (Pin di Peta)</label>
-                    <div class="small text-muted mb-2">
-                      Seret dan zum peta, kemudian <strong>klik</strong> lokasi rumah / premis anda untuk pin pickup.
-                    </div>
-                    <div id="map"></div>
-                    <input type="text" class="form-control mt-2" id="locationText" readonly
-                           value="Belum ada lokasi. Klik pada peta untuk pin lokasi.">
-                  </div>
-
-                  <div class="alert alert-info small mb-3 request-hint">
-                    Tip: Anda boleh pin lokasi supaya collector boleh terus buka lokasi di Google Maps melalui
-                    order dan mesej WhatsApp.
-                  </div>
-
-                  <button type="submit" class="btn btn-request w-100">
-                    Hantar &amp; Kira Insentif
-                  </button>
-                </form>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <!-- Leaflet JS + app.js (Leaflet mesti dulu) -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
