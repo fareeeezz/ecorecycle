@@ -18,7 +18,7 @@ const MATERIAL_RATES = {
     rate: 0.80,
     pointsPerKg: 15
   },
-  // ✅ alias supaya option "Tin / Aluminium" pun kira rate betul
+  // ✅ alias kalau ada yang guna value "Tin / Aluminium"
   "Tin / Aluminium": {
     rate: 0.80,
     pointsPerKg: 15
@@ -166,7 +166,7 @@ function getDisplayName(user) {
 
 
 // ====================================
-//  MULTI ITEM HELPERS (NEW)
+//  MULTI ITEM HELPERS
 // ====================================
 
 function _normMaterialKey(m) {
@@ -222,7 +222,6 @@ function _setupNoDuplicateMaterialOnChange() {
     if (!isMain && !isExtra) return;
 
     if (_hasDuplicateMaterial()) {
-      // reset yang baru tukar sahaja
       target.value = "";
       alert("Sila pilih jenis barang yang lain.");
     }
@@ -233,7 +232,6 @@ function _setupNoDuplicateMaterialOnChange() {
   }
 
   if (multiContainer) {
-    // event delegation untuk item tambahan yang dynamically created
     multiContainer.addEventListener("change", onAnyMaterialChanged);
   }
 }
@@ -411,7 +409,8 @@ function handleRequestSubmit(event) {
   }
 
   // ====================================
-  //  MULTI ITEM COLLECT + VALIDATION (NEW)
+  //  MULTI ITEM COLLECT + VALIDATION (FIXED)
+  //  ✅ FIX: scan EXTRA hanya dalam #multiItemContainer
   // ====================================
 
   const items = [];
@@ -421,9 +420,10 @@ function handleRequestSubmit(event) {
   items.push({ material: material, weightKg: weight });
   seen.add(_normMaterialKey(material));
 
-  // item tambahan (optional)
-  const extraMaterialEls = document.querySelectorAll(".material-item");
-  const extraWeightEls   = document.querySelectorAll(".weight-item");
+  // item tambahan (optional) - scoped
+  const multiContainer = document.getElementById("multiItemContainer");
+  const extraMaterialEls = multiContainer ? multiContainer.querySelectorAll(".material-item") : [];
+  const extraWeightEls   = multiContainer ? multiContainer.querySelectorAll(".weight-item") : [];
 
   for (let i = 0; i < extraMaterialEls.length; i++) {
     const mEl = extraMaterialEls[i];
@@ -435,7 +435,6 @@ function handleRequestSubmit(event) {
     // kalau row kosong (dua-dua kosong) → skip
     if (!mVal && !wRaw) continue;
 
-    // kalau satu kosong → error
     const wVal = parseFloat(wRaw);
 
     if (!mVal) {
@@ -447,7 +446,6 @@ function handleRequestSubmit(event) {
       return false;
     }
 
-    // duplicate check
     const key = _normMaterialKey(mVal);
     if (seen.has(key)) {
       alert("Sila pilih jenis barang yang lain.");
@@ -458,7 +456,7 @@ function handleRequestSubmit(event) {
     items.push({ material: mVal, weightKg: wVal });
   }
 
-  // max 6 item total (ikut 6 jenis bahan)
+  // max 6 item total
   if (items.length > 6) {
     alert("Maksimum 6 jenis barang dalam satu order.");
     return false;
@@ -466,7 +464,7 @@ function handleRequestSubmit(event) {
 
   const request = new PickupRequest(user, material, weight);
 
-  // simpan list item dalam request (NEW)
+  // simpan list item dalam request
   request.items = items;
 
   // baca lokasi dari pin map jika ada
@@ -511,7 +509,7 @@ function displayCalculation() {
   const user = reqData.user;
   const displayName = getDisplayName(user);
 
-  // request object untuk rider map (kekal guna location yang sama)
+  // request object untuk rider map (kekal guna location)
   const request = new PickupRequest(
     user,
     reqData.material,
@@ -519,9 +517,7 @@ function displayCalculation() {
   );
   request.location = reqData.location || null;
 
-  // ================================
-  //  MULTI ITEM: ambil items
-  // ================================
+  // MULTI ITEM: ambil items
   let items = [];
 
   if (Array.isArray(reqData.items) && reqData.items.length > 0) {
@@ -536,9 +532,7 @@ function displayCalculation() {
     }];
   }
 
-  // ================================
-  //  kira per item + total
-  // ================================
+  // kira per item + total
   let totalIncentiveAll = 0;
   let totalPointsAll = 0;
 
@@ -586,7 +580,7 @@ Mata Ganjaran: ${itemPoints.toFixed(0)}
   const totalRMText = totalIncentiveAll.toFixed(2);
   const totalPointsText = totalPointsAll.toFixed(0);
 
-  // Lokasi (kekal asal)
+  // Lokasi
   let locationLineText = "Lokasi pickup: (tiada GPS – pengguna tidak pin lokasi)";
   let locationWaLine   = "Lokasi: (tiada GPS – pengguna tidak pin lokasi)";
   let locationHtml     = `<p><strong>Lokasi pickup:</strong> Tiada (GPS tidak ditetapkan)</p>`;
@@ -604,9 +598,6 @@ Mata Ganjaran: ${itemPoints.toFixed(0)}
     `;
   }
 
-  // ================================
-  //  receiptText + waMessage (UPDATED)
-  // ================================
   const receiptText = `
 ORDER PICKUP ECORCYCLE
 
@@ -637,9 +628,6 @@ ${locationWaLine}
 
   const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
 
-  // ================================
-  //  UI asal (kekal) + tambah table items
-  // ================================
   container.innerHTML = `
     <div class="row justify-content-center">
       <div class="col-md-8">
@@ -716,7 +704,6 @@ ${locationWaLine}
     </div>
   `;
 
-  // 🚚 lepas HTML dah render, baru init peta rider (kekal)
   initRiderMap(request);
 }
 
@@ -725,13 +712,11 @@ function initRiderMap(request) {
   const infoP  = document.getElementById("riderInfo");
   if (!mapDiv) return;
 
-  // Kalau Leaflet tak wujud
   if (typeof L === "undefined") {
     if (infoP) infoP.textContent = "Ralat: peta rider tidak dapat dimuatkan.";
     return;
   }
 
-  // Kalau user tak pin lokasi masa Request
   if (!request.location || !request.location.lat || !request.location.lng) {
     if (infoP) {
       infoP.textContent =
@@ -743,7 +728,6 @@ function initRiderMap(request) {
   const custLat = request.location.lat;
   const custLng = request.location.lng;
 
-  // Set view pada lokasi pelanggan
   const map = L.map("riderMap").setView([custLat, custLng], 14);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -751,19 +735,16 @@ function initRiderMap(request) {
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
-  // Marker pelanggan
   const customerMarker = L.marker([custLat, custLng]).addTo(map)
     .bindPopup("Lokasi Pelanggan").openPopup();
 
-  // Rider mula +/- 1km dari pelanggan (simulasi)
   const riderStart = [custLat + 0.01, custLng - 0.01];
   const riderMarker = L.marker(riderStart).addTo(map)
     .bindPopup("Rider EcoRecycle");
 
-  // Animasi rider bergerak ke pelanggan
   let step = 0;
-  const totalSteps = 40;      // lagi besar, lagi perlahan
-  const intervalMs = 500;     // 0.5s setiap langkah
+  const totalSteps = 40;
+  const intervalMs = 500;
 
   if (infoP) {
     infoP.textContent =
@@ -772,7 +753,7 @@ function initRiderMap(request) {
 
   const interval = setInterval(() => {
     step++;
-    const t = step / totalSteps;  // 0 → 1
+    const t = step / totalSteps;
     const lat = riderStart[0] + (custLat - riderStart[0]) * t;
     const lng = riderStart[1] + (custLng - riderStart[1]) * t;
     riderMarker.setLatLng([lat, lng]);
@@ -803,7 +784,6 @@ function downloadReceiptPdf() {
   const user = reqData.user;
   const displayName = getDisplayName(user);
 
-  // ambil items (multi / single)
   let items = [];
 
   if (Array.isArray(reqData.items) && reqData.items.length > 0) {
@@ -818,7 +798,6 @@ function downloadReceiptPdf() {
     }];
   }
 
-  // location
   const request = new PickupRequest(user, reqData.material, reqData.weightKg);
   request.location = reqData.location || null;
 
@@ -857,7 +836,6 @@ function downloadReceiptPdf() {
   doc.text(`Tarikh: ${tarikh}`, margin, y);
   y += 10;
 
-  // box height dynamic ikut item (max 6)
   const baseBoxHeight = 115;
   const extraPerItem = 10;
   const boxHeight = baseBoxHeight + Math.max(0, items.length - 1) * extraPerItem;
@@ -988,7 +966,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     initMapPicker();
 
-    // ✅ NEW: elak pilih jenis barang sama
+    // ✅ elak pilih jenis barang sama (real-time)
     _setupNoDuplicateMaterialOnChange();
 
     requestForm.addEventListener("submit", handleRequestSubmit);
