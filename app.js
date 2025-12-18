@@ -18,11 +18,6 @@ const MATERIAL_RATES = {
     rate: 0.80,
     pointsPerKg: 15
   },
-  // ✅ alias kalau ada yang guna value "Tin / Aluminium"
-  "Tin / Aluminium": {
-    rate: 0.80,
-    pointsPerKg: 15
-  },
   "Kaca": {
     rate: 0.10,
     pointsPerKg: 5
@@ -166,74 +161,76 @@ function getDisplayName(user) {
 
 
 // ====================================
-//  MULTI ITEM HELPERS
+//  NAVBAR AUTO HIDE/SHOW + LOGOUT
 // ====================================
 
-function _normMaterialKey(m) {
-  return (m || "").trim().toLowerCase();
-}
-
-function _collectAllMaterialSelects() {
-  const selects = [];
-  const main = document.getElementById("material");
-  if (main) selects.push(main);
-
-  const multiContainer = document.getElementById("multiItemContainer");
-  if (multiContainer) {
-    const extras = multiContainer.querySelectorAll(".material-item");
-    extras.forEach(s => selects.push(s));
-  }
-
-  return selects;
-}
-
-function _hasDuplicateMaterial() {
-  const selects = _collectAllMaterialSelects();
-  const seen = new Set();
-
-  for (const sel of selects) {
-    if (!sel) continue;
-    const v = (sel.value || "").trim();
-    if (!v) continue;
-
-    const key = _normMaterialKey(v);
-    if (seen.has(key)) {
-      return true;
-    }
-    seen.add(key);
-  }
-
+function handleLogout(event) {
+  if (event) event.preventDefault();
+  clearLoginSession();
+  window.location.href = "index.html";
   return false;
 }
 
-function _setupNoDuplicateMaterialOnChange() {
-  const main = document.getElementById("material");
-  const multiContainer = document.getElementById("multiItemContainer");
+function updateEcoNavbar() {
+  const navs = document.querySelectorAll(".eco-nav");
+  if (!navs || navs.length === 0) return;
 
-  if (!main && !multiContainer) return;
+  const loggedIn = isLoggedIn();
 
-  function onAnyMaterialChanged(e) {
-    const target = e && e.target ? e.target : null;
-    if (!target) return;
+  const page = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const isIndexPage  = (page === "" || page === "index.html");
+  const isSignupPage = (page === "signup.html");
 
-    const isMain = (main && target === main);
-    const isExtra = (target.classList && target.classList.contains("material-item"));
+  navs.forEach(nav => {
+    const loginLink   = nav.querySelector('a[href="index.html"]');
+    const signupLink  = nav.querySelector('a[href="signup.html"]');
+    const requestLink = nav.querySelector('a[href="request.html"]');
+    const orderLink   = nav.querySelector('a[href="calculate.html"]');
 
-    if (!isMain && !isExtra) return;
+    let logoutLink = nav.querySelector('a[data-eco="logout"]');
 
-    if (_hasDuplicateMaterial()) {
-      target.value = "";
-      alert("Sila pilih jenis barang yang lain.");
+    if (loggedIn) {
+      // ✅ Logged in: show Request + Order + Logout
+      if (loginLink)  loginLink.style.display = "none";
+      if (signupLink) signupLink.style.display = "none";
+
+      if (requestLink) requestLink.style.display = "";
+      if (orderLink)   orderLink.style.display = "";
+
+      if (!logoutLink) {
+        logoutLink = document.createElement("a");
+        logoutLink.href = "#";
+        logoutLink.textContent = "Logout";
+        logoutLink.className = "eco-nav-link";
+        logoutLink.setAttribute("data-eco", "logout");
+        logoutLink.addEventListener("click", handleLogout);
+        nav.appendChild(logoutLink);
+      } else {
+        logoutLink.style.display = "";
+      }
+
+    } else {
+      // ✅ Not logged in: hide Request + Order, remove Logout
+      if (logoutLink) logoutLink.remove();
+
+      if (requestLink) requestLink.style.display = "none";
+      if (orderLink)   orderLink.style.display = "none";
+
+      // 🔥 Rules ikut permintaan:
+      // index.html -> tinggal Sign Up sahaja
+      // signup.html -> tinggal Login sahaja
+      if (isIndexPage) {
+        if (loginLink)  loginLink.style.display = "none";
+        if (signupLink) signupLink.style.display = "";
+      } else if (isSignupPage) {
+        if (signupLink) signupLink.style.display = "none";
+        if (loginLink)  loginLink.style.display = "";
+      } else {
+        if (loginLink)  loginLink.style.display = "";
+        if (signupLink) signupLink.style.display = "";
+      }
     }
-  }
-
-  if (main) {
-    main.addEventListener("change", onAnyMaterialChanged);
-  }
-
-  if (multiContainer) {
-    multiContainer.addEventListener("change", onAnyMaterialChanged);
-  }
+  });
 }
 
 
@@ -396,7 +393,7 @@ function handleRequestSubmit(event) {
     return false;
   }
 
-  const material = materialEl.value;
+  const material = (materialEl.value || "").trim();
   const weight   = parseFloat(weightEl.value);
 
   if (!material) {
@@ -408,66 +405,63 @@ function handleRequestSubmit(event) {
     return false;
   }
 
-  // ====================================
-  //  MULTI ITEM COLLECT + VALIDATION (FIXED)
-  //  ✅ FIX: scan EXTRA hanya dalam #multiItemContainer
-  // ====================================
-
-  const items = [];
-  const seen = new Set();
+  // ================================
+  // MULTI ITEM: ambil item tambahan
+  // ================================
+  let items = [];
 
   // item utama (wajib)
-  items.push({ material: material, weightKg: weight });
-  seen.add(_normMaterialKey(material));
+  items.push({
+    material: material,
+    weightKg: weight
+  });
 
-  // item tambahan (optional) - scoped
-  const multiContainer = document.getElementById("multiItemContainer");
-  const extraMaterialEls = multiContainer ? multiContainer.querySelectorAll(".material-item") : [];
-  const extraWeightEls   = multiContainer ? multiContainer.querySelectorAll(".weight-item") : [];
+  // item tambahan dari request.html (class material-item + weight-item)
+  const extraMaterialEls = document.querySelectorAll(".material-item");
+  const extraWeightEls   = document.querySelectorAll(".weight-item");
 
-  for (let i = 0; i < extraMaterialEls.length; i++) {
-    const mEl = extraMaterialEls[i];
-    const wEl = extraWeightEls[i];
+  if (extraMaterialEls && extraWeightEls && extraMaterialEls.length > 0) {
+    for (let i = 0; i < extraMaterialEls.length; i++) {
+      const m = (extraMaterialEls[i].value || "").trim();
+      const w = parseFloat(extraWeightEls[i] ? extraWeightEls[i].value : "");
 
-    const mVal = mEl ? (mEl.value || "").trim() : "";
-    const wRaw = wEl ? (wEl.value || "").trim() : "";
+      // ignore row kosong
+      if (!m && (!w || isNaN(w))) continue;
 
-    // kalau row kosong (dua-dua kosong) → skip
-    if (!mVal && !wRaw) continue;
+      // kalau isi separuh -> error
+      if (!m) {
+        alert("Sila pilih jenis barangan untuk item tambahan.");
+        return false;
+      }
+      if (isNaN(w) || w <= 0) {
+        alert("Sila masukkan berat (kg) yang sah untuk item tambahan.");
+        return false;
+      }
 
-    const wVal = parseFloat(wRaw);
-
-    if (!mVal) {
-      alert("Sila pilih jenis barang yang sah untuk item tambahan.");
-      return false;
+      items.push({
+        material: m,
+        weightKg: w
+      });
     }
-    if (isNaN(wVal) || wVal <= 0) {
-      alert("Sila masukkan berat yang sah untuk item tambahan (lebih daripada 0).");
-      return false;
-    }
+  }
 
-    const key = _normMaterialKey(mVal);
+  // ================================
+  // VALIDASI DUPLICATE MATERIAL
+  // ================================
+  const chosen = items.map(x => (x.material || "").trim()).filter(Boolean);
+  const seen = new Set();
+  for (let i = 0; i < chosen.length; i++) {
+    const key = chosen[i].toLowerCase();
     if (seen.has(key)) {
       alert("Sila pilih jenis barang yang lain.");
       return false;
     }
     seen.add(key);
-
-    items.push({ material: mVal, weightKg: wVal });
   }
 
-  // max 6 item total
-  if (items.length > 6) {
-    alert("Maksimum 6 jenis barang dalam satu order.");
-    return false;
-  }
-
-  const request = new PickupRequest(user, material, weight);
-
-  // simpan list item dalam request
-  request.items = items;
-
-  // baca lokasi dari pin map jika ada
+  // ================================
+  // Lokasi (pin map)
+  // ================================
   let location = null;
   if (latInput && lngInput && latInput.value && lngInput.value) {
     location = {
@@ -475,9 +469,15 @@ function handleRequestSubmit(event) {
       lng: parseFloat(lngInput.value)
     };
   }
+
+  // Simpan request format kekal + multi items
+  const request = new PickupRequest(user, material, weight);
   if (location) {
     request.location = location;
   }
+
+  // ✅ tambah items untuk resit multi
+  request.items = items;
 
   saveRequest(request);
   window.location.href = "calculate.html";
@@ -509,76 +509,19 @@ function displayCalculation() {
   const user = reqData.user;
   const displayName = getDisplayName(user);
 
-  // request object untuk rider map (kekal guna location)
-  const request = new PickupRequest(
-    user,
-    reqData.material,
-    reqData.weightKg
-  );
-  request.location = reqData.location || null;
-
-  // MULTI ITEM: ambil items
+  // ================================
+  // Items: single vs multi
+  // ================================
   let items = [];
 
   if (Array.isArray(reqData.items) && reqData.items.length > 0) {
-    items = reqData.items.map(it => ({
-      material: (it.material || "").trim(),
-      weightKg: parseFloat(it.weightKg)
-    })).filter(it => it.material && !isNaN(it.weightKg) && it.weightKg > 0);
+    items = reqData.items;
   } else {
     items = [{
       material: reqData.material,
-      weightKg: parseFloat(reqData.weightKg)
+      weightKg: reqData.weightKg
     }];
   }
-
-  // kira per item + total
-  let totalIncentiveAll = 0;
-  let totalPointsAll = 0;
-
-  let itemsTableRowsHtml = "";
-  let receiptItemsBlockText = "";
-  let waItemsBlockText = "";
-
-  items.forEach((item, index) => {
-    const tempReq = new PickupRequest(user, item.material, item.weightKg);
-    const res = IncentiveCalculator.calculate(tempReq);
-
-    const ratePerKg = res.ratePerKg;
-    const pointsPerKg = res.pointsPerKg;
-    const itemRM = res.totalIncentive;
-    const itemPoints = res.points;
-
-    totalIncentiveAll += itemRM;
-    totalPointsAll += itemPoints;
-
-    itemsTableRowsHtml += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${item.material}</td>
-        <td>${item.weightKg} kg</td>
-        <td>RM ${ratePerKg.toFixed(2)} / kg</td>
-        <td>RM ${itemRM.toFixed(2)}</td>
-        <td>${itemPoints.toFixed(0)}</td>
-      </tr>
-    `;
-
-    receiptItemsBlockText +=
-`Item ${index + 1}
-Jenis        : ${item.material}
-Berat        : ${item.weightKg} kg
-Kadar        : RM ${ratePerKg.toFixed(2)} / kg, ${pointsPerKg.toFixed(0)} mata / kg
-Insentif     : RM ${itemRM.toFixed(2)}
-Mata Ganjaran: ${itemPoints.toFixed(0)}
-`;
-
-    waItemsBlockText +=
-`Item ${index + 1}: ${item.material} | ${item.weightKg} kg | RM ${itemRM.toFixed(2)} | ${itemPoints.toFixed(0)} mata
-`;
-  });
-
-  const totalRMText = totalIncentiveAll.toFixed(2);
-  const totalPointsText = totalPointsAll.toFixed(0);
 
   // Lokasi
   let locationLineText = "Lokasi pickup: (tiada GPS – pengguna tidak pin lokasi)";
@@ -586,9 +529,9 @@ Mata Ganjaran: ${itemPoints.toFixed(0)}
   let locationHtml     = `<p><strong>Lokasi pickup:</strong> Tiada (GPS tidak ditetapkan)</p>`;
   let mapsUrl          = "";
 
-  if (request.location && request.location.lat && request.location.lng) {
-    const lat = request.location.lat;
-    const lng = request.location.lng;
+  if (reqData.location && reqData.location.lat && reqData.location.lng) {
+    const lat = reqData.location.lat;
+    const lng = reqData.location.lng;
     mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
     locationLineText = `Lokasi pickup (GPS): ${lat}, ${lng}`;
     locationWaLine   = `Lokasi (Google Maps): ${mapsUrl}`;
@@ -598,14 +541,60 @@ Mata Ganjaran: ${itemPoints.toFixed(0)}
     `;
   }
 
+  // ================================
+  // Kiraan: per item + total
+  // ================================
+  let totalRM = 0;
+  let totalPoints = 0;
+
+  let itemsHtml = "";
+  let receiptItemsText = "";
+  let waItemsText = "";
+
+  items.forEach((item, idx) => {
+    const mat = item.material;
+    const wKg = parseFloat(item.weightKg);
+
+    const tempReq = new PickupRequest(user, mat, wKg);
+    const res = IncentiveCalculator.calculate(tempReq);
+
+    const itemRM = res.totalIncentive;
+    const itemPoints = res.points;
+    const ratePerKg = res.ratePerKg;
+    const pointsPerKg = res.pointsPerKg;
+
+    totalRM += itemRM;
+    totalPoints += itemPoints;
+
+    itemsHtml += `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${mat}</td>
+        <td>${wKg} kg</td>
+        <td>RM ${ratePerKg.toFixed(2)} / kg</td>
+        <td>RM ${itemRM.toFixed(2)}</td>
+        <td>${itemPoints.toFixed(0)}</td>
+      </tr>
+    `;
+
+    receiptItemsText += `Item ${idx + 1}: ${mat} | ${wKg} kg | RM ${ratePerKg.toFixed(2)} / kg | RM ${itemRM.toFixed(2)} | ${itemPoints.toFixed(0)} mata\n`;
+    waItemsText += `Item ${idx + 1}: ${mat}, ${wKg}kg, RM${itemRM.toFixed(2)}, ${itemPoints.toFixed(0)} mata\n`;
+  });
+
+  const totalRMText = totalRM.toFixed(2);
+  const totalPointsText = totalPoints.toFixed(0);
+
+  // ================================
+  // Receipt text (copy/simpan)
+  // ================================
   const receiptText = `
 ORDER PICKUP ECORCYCLE
 
 Username      : ${displayName}
 Telefon       : ${user.phone || "-"}
-Jumlah Item   : ${items.length}
 
-${receiptItemsBlockText}
+SENARAI BARANGAN:
+${receiptItemsText}
 JUMLAH INSENTIF : RM ${totalRMText}
 JUMLAH MATA     : ${totalPointsText}
 ${locationLineText}
@@ -613,14 +602,17 @@ ${locationLineText}
 Terima kasih kerana menyokong kitar semula.
   `.trim();
 
+  // ================================
+  // WhatsApp message
+  // ================================
   const waMessage = `
 EcoRecycle Pickup Order
 
 Username: ${displayName}
 Telefon: ${user.phone || "-"}
-Jumlah item: ${items.length}
 
-${waItemsBlockText}
+Senarai barangan:
+${waItemsText}
 Jumlah insentif: RM ${totalRMText}
 Jumlah mata: ${totalPointsText}
 ${locationWaLine}
@@ -628,54 +620,61 @@ ${locationWaLine}
 
   const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
 
+  // ================================
+  // UI HTML (kekal semua feature)
+  // ================================
   container.innerHTML = `
     <div class="row justify-content-center">
-      <div class="col-md-8">
+      <div class="col-md-10">
         <h2 class="mb-4 text-center">Maklumat Order & Rider</h2>
 
         <div class="card shadow-sm mb-4" id="receiptCard">
           <div class="card-body">
             <h5 class="card-title">Order Pickup</h5>
+
             <p><strong>Username:</strong> ${displayName}</p>
             <p><strong>Telefon:</strong> ${user.phone || "-"}</p>
-
-            <p class="mb-2"><strong>Jumlah item:</strong> ${items.length}</p>
-
-            <div class="table-responsive">
-              <table class="table table-bordered mt-2">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Jenis Barang</th>
-                    <th>Berat</th>
-                    <th>Kadar</th>
-                    <th>Insentif (RM)</th>
-                    <th>Mata</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsTableRowsHtml}
-                </tbody>
-              </table>
-            </div>
 
             ${locationHtml}
 
             <hr>
-            <p class="fs-5"><strong>Insentif (Total):</strong> RM ${totalRMText}</p>
-            <p class="fs-5"><strong>Mata Ganjaran (Total):</strong> ${totalPointsText} points</p>
+
+            <h6 class="mb-2"><strong>Senarai Barangan</strong></h6>
+
+            <div class="table-responsive">
+              <table class="table table-bordered align-middle">
+                <thead>
+                  <tr>
+                    <th style="width:60px;">#</th>
+                    <th>Jenis Barang</th>
+                    <th style="width:120px;">Berat</th>
+                    <th style="width:160px;">Kadar</th>
+                    <th style="width:140px;">Harga</th>
+                    <th style="width:120px;">Mata</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                </tbody>
+              </table>
+            </div>
+
+            <hr>
+
+            <p class="fs-5"><strong>Jumlah Insentif:</strong> RM ${totalRMText}</p>
+            <p class="fs-5"><strong>Jumlah Mata Ganjaran:</strong> ${totalPointsText} points</p>
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Teks Order (copy / simpan)</label>
-          <textarea class="form-control" rows="12" readonly>${receiptText}</textarea>
+          <textarea class="form-control" rows="10" readonly>${receiptText}</textarea>
         </div>
 
         <h4 class="mb-3">Mesej WhatsApp ke Owner</h4>
         <div class="mb-3">
           <label class="form-label">Preview mesej WhatsApp</label>
-          <textarea class="form-control" rows="12" readonly>${waMessage}</textarea>
+          <textarea class="form-control" rows="10" readonly>${waMessage}</textarea>
         </div>
 
         <p class="text-muted">
@@ -704,7 +703,9 @@ ${locationWaLine}
     </div>
   `;
 
-  initRiderMap(request);
+  // 🚚 lepas HTML dah render, baru init peta rider
+  const reqForRider = { location: reqData.location || null };
+  initRiderMap(reqForRider);
 }
 
 function initRiderMap(request) {
@@ -712,11 +713,13 @@ function initRiderMap(request) {
   const infoP  = document.getElementById("riderInfo");
   if (!mapDiv) return;
 
+  // Kalau Leaflet tak wujud
   if (typeof L === "undefined") {
     if (infoP) infoP.textContent = "Ralat: peta rider tidak dapat dimuatkan.";
     return;
   }
 
+  // Kalau user tak pin lokasi masa Request
   if (!request.location || !request.location.lat || !request.location.lng) {
     if (infoP) {
       infoP.textContent =
@@ -728,6 +731,7 @@ function initRiderMap(request) {
   const custLat = request.location.lat;
   const custLng = request.location.lng;
 
+  // Set view pada lokasi pelanggan
   const map = L.map("riderMap").setView([custLat, custLng], 14);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -735,16 +739,19 @@ function initRiderMap(request) {
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
+  // Marker pelanggan
   const customerMarker = L.marker([custLat, custLng]).addTo(map)
     .bindPopup("Lokasi Pelanggan").openPopup();
 
+  // Rider mula +/- 1km dari pelanggan (simulasi)
   const riderStart = [custLat + 0.01, custLng - 0.01];
   const riderMarker = L.marker(riderStart).addTo(map)
     .bindPopup("Rider EcoRecycle");
 
+  // Animasi rider bergerak ke pelanggan
   let step = 0;
-  const totalSteps = 40;
-  const intervalMs = 500;
+  const totalSteps = 40;      // lagi besar, lagi perlahan
+  const intervalMs = 500;     // 0.5s setiap langkah
 
   if (infoP) {
     infoP.textContent =
@@ -753,7 +760,7 @@ function initRiderMap(request) {
 
   const interval = setInterval(() => {
     step++;
-    const t = step / totalSteps;
+    const t = step / totalSteps;  // 0 → 1
     const lat = riderStart[0] + (custLat - riderStart[0]) * t;
     const lng = riderStart[1] + (custLng - riderStart[1]) * t;
     riderMarker.setLatLng([lat, lng]);
@@ -785,25 +792,18 @@ function downloadReceiptPdf() {
   const displayName = getDisplayName(user);
 
   let items = [];
-
   if (Array.isArray(reqData.items) && reqData.items.length > 0) {
-    items = reqData.items.map(it => ({
-      material: (it.material || "").trim(),
-      weightKg: parseFloat(it.weightKg)
-    })).filter(it => it.material && !isNaN(it.weightKg) && it.weightKg > 0);
+    items = reqData.items;
   } else {
     items = [{
       material: reqData.material,
-      weightKg: parseFloat(reqData.weightKg)
+      weightKg: reqData.weightKg
     }];
   }
 
-  const request = new PickupRequest(user, reqData.material, reqData.weightKg);
-  request.location = reqData.location || null;
-
   let locationPdfLine = "Lokasi: (tiada GPS)";
-  if (request.location && request.location.lat && request.location.lng) {
-    locationPdfLine = `Lokasi (GPS): ${request.location.lat}, ${request.location.lng}`;
+  if (reqData.location && reqData.location.lat && reqData.location.lng) {
+    locationPdfLine = `Lokasi (GPS): ${reqData.location.lat}, ${reqData.location.lng}`;
   }
 
   if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -836,67 +836,60 @@ function downloadReceiptPdf() {
   doc.text(`Tarikh: ${tarikh}`, margin, y);
   y += 10;
 
-  const baseBoxHeight = 115;
-  const extraPerItem = 10;
-  const boxHeight = baseBoxHeight + Math.max(0, items.length - 1) * extraPerItem;
-
-  const boxTop = y;
-  const boxWidth = pageWidth - 2 * margin;
-
-  doc.roundedRect(margin, boxTop, boxWidth, boxHeight, 3, 3);
-
-  let textY = boxTop + 12;
-  const textX = margin + 7;
-
   doc.setFont("helvetica", "bold");
-  doc.text("Maklumat Pengguna", textX, textY);
-  textY += 8;
+  doc.text("Maklumat Pengguna", margin, y);
+  y += 7;
 
   doc.setFont("helvetica", "normal");
-  doc.text(`Username   : ${displayName}`, textX, textY);      textY += 7;
-  doc.text(`Telefon    : ${user.phone || "-"}`, textX, textY); textY += 7;
+  doc.text(`Username   : ${displayName}`, margin, y); y += 6;
+  doc.text(`Telefon    : ${user.phone || "-"}`, margin, y); y += 8;
 
-  textY += 3;
   doc.setFont("helvetica", "bold");
-  doc.text("Maklumat Pickup", textX, textY);
-  textY += 8;
+  doc.text("Maklumat Pickup", margin, y);
+  y += 7;
 
   doc.setFont("helvetica", "normal");
-  doc.text(`Jumlah item : ${items.length}`, textX, textY); textY += 7;
-  doc.text(locationPdfLine, textX, textY); textY += 7;
+  doc.text(locationPdfLine, margin, y);
+  y += 8;
 
-  textY += 2;
   doc.setFont("helvetica", "bold");
-  doc.text("Senarai Barangan", textX, textY);
-  textY += 8;
+  doc.text("Senarai Barangan", margin, y);
+  y += 7;
 
-  doc.setFont("helvetica", "normal");
-
-  let totalRMAll = 0;
-  let totalPointsAll = 0;
+  let totalRM = 0;
+  let totalPoints = 0;
 
   items.forEach((item, idx) => {
-    const tempReq = new PickupRequest(user, item.material, item.weightKg);
+    const mat = item.material;
+    const wKg = parseFloat(item.weightKg);
+
+    const tempReq = new PickupRequest(user, mat, wKg);
     const res = IncentiveCalculator.calculate(tempReq);
 
-    totalRMAll += res.totalIncentive;
-    totalPointsAll += res.points;
+    const itemRM = res.totalIncentive;
+    const itemPoints = res.points;
+    const ratePerKg = res.ratePerKg;
 
-    const line = `Item ${idx + 1}: ${item.material} | ${item.weightKg} kg | RM ${res.totalIncentive.toFixed(2)} | ${res.points.toFixed(0)} mata`;
-    doc.text(line, textX, textY);
-    textY += 7;
+    totalRM += itemRM;
+    totalPoints += itemPoints;
+
+    const line = `${idx + 1}. ${mat} | ${wKg} kg | RM ${ratePerKg.toFixed(2)}/kg | RM ${itemRM.toFixed(2)} | ${itemPoints.toFixed(0)} mata`;
+
+    // page break kalau hampir habis
+    if (y > pageHeight - 30) {
+      doc.addPage();
+      y = margin;
+    }
+
+    doc.text(line, margin, y);
+    y += 6;
   });
 
-  textY += 3;
+  y += 6;
   doc.setFont("helvetica", "bold");
-  doc.text("Jumlah", textX, textY);
-  textY += 8;
+  doc.text(`Jumlah Insentif : RM ${totalRM.toFixed(2)}`, margin, y); y += 7;
+  doc.text(`Jumlah Mata     : ${totalPoints.toFixed(0)} points`, margin, y); y += 10;
 
-  doc.setFont("helvetica", "normal");
-  doc.text(`Jumlah insentif  : RM ${totalRMAll.toFixed(2)}`, textX, textY); textY += 7;
-  doc.text(`Jumlah mata      : ${totalPointsAll.toFixed(0)} points`, textX, textY);
-
-  y = boxTop + boxHeight + 15;
   doc.setFont("helvetica", "italic");
   doc.setFontSize(10);
   doc.text(
@@ -937,6 +930,9 @@ document.addEventListener("DOMContentLoaded", function () {
     clearLoginSession();
   }
 
+  // ✅ NAVBAR RULES (ikut permintaan gambar)
+  updateEcoNavbar();
+
   const loggedIn = isLoggedIn();
   const user = getUser();
 
@@ -965,10 +961,6 @@ document.addEventListener("DOMContentLoaded", function () {
       welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
     }
     initMapPicker();
-
-    // ✅ elak pilih jenis barang sama (real-time)
-    _setupNoDuplicateMaterialOnChange();
-
     requestForm.addEventListener("submit", handleRequestSubmit);
   }
 
