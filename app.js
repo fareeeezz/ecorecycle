@@ -1,8 +1,6 @@
 // ====================================
-//  KONSTANT SISTEM
+//  SYSTEM CONSTANTS
 // ====================================
-const RATE_PER_KG = 0.30;
-const POINTS_PER_KG = 10;
 
 const MATERIAL_RATES = {
   "Plastik": { rate: 0.30, pointsPerKg: 10 },
@@ -16,8 +14,9 @@ const MATERIAL_RATES = {
 const ADMIN_WA_NUMBER = "601111473069";
 
 // ====================================
-//  USER + REQUEST
+//  MODELS
 // ====================================
+
 class User {
   constructor(username, phone, password) {
     this.username = username;
@@ -27,223 +26,208 @@ class User {
 }
 
 class PickupRequest {
-  constructor(user, items) {
+  constructor(user, material, weightKg) {
     this.user = user;
-    this.items = items; // [{material, weightKg}]
+    this.material = material;
+    this.weightKg = weightKg;
   }
 }
 
 // ====================================
-//  INCENTIVE
+//  USER DATABASE (localStorage)
 // ====================================
-function calculateMultipleItems(items) {
-  let totalRM = 0;
-  let totalPoints = 0;
 
-  const breakdown = items.map(i => {
-    const rateInfo = MATERIAL_RATES[i.material];
-    const itemRM = i.weightKg * rateInfo.rate;
-    const itemPoints = i.weightKg * rateInfo.pointsPerKg;
-
-    totalRM += itemRM;
-    totalPoints += itemPoints;
-
-    return {
-      ...i,
-      rate: rateInfo.rate,
-      pointsPerKg: rateInfo.pointsPerKg,
-      itemRM,
-      itemPoints
-    };
-  });
-
-  return { breakdown, totalRM, totalPoints };
-}
-
-// ====================================
-//  STORAGE
-// ====================================
 function getUsers() {
   return JSON.parse(localStorage.getItem("eco_users") || "[]");
 }
+
 function saveUsers(users) {
   localStorage.setItem("eco_users", JSON.stringify(users));
 }
 
-function setLoggedIn(user) {
+function addUser(user) {
+  const users = getUsers();
+  users.push(user);
+  saveUsers(users);
+}
+
+function findUser(username, phone, password) {
+  const u = username.toLowerCase();
+  const p = phone.replace(/\D/g, "");
+  return getUsers().find(x =>
+    x.username.toLowerCase() === u &&
+    x.phone.replace(/\D/g, "") === p &&
+    x.password === password
+  );
+}
+
+// ====================================
+//  SESSION (sessionStorage ONLY)
+// ====================================
+
+function loginUser(user) {
   sessionStorage.setItem("eco_logged_in", "1");
   sessionStorage.setItem("eco_user", JSON.stringify(user));
 }
-function isLoggedIn() {
-  return sessionStorage.getItem("eco_logged_in") === "1";
-}
-function getUser() {
-  return JSON.parse(sessionStorage.getItem("eco_user"));
-}
-function logout() {
+
+function logoutUser() {
   sessionStorage.clear();
 }
 
-function saveRequest(req) {
-  sessionStorage.setItem("eco_request", JSON.stringify(req));
-}
-function getRequest() {
-  return JSON.parse(sessionStorage.getItem("eco_request"));
+function isLoggedIn() {
+  return sessionStorage.getItem("eco_logged_in") === "1";
 }
 
-// ====================================
-//  LOGIN
-// ====================================
-function handleLogin(e) {
-  e.preventDefault();
-
-  const u = username.value.trim();
-  const p = password.value.trim();
-  const ph = phone.value.trim().replace(/\D/g, "");
-
-  const user = getUsers().find(x =>
-    x.username === u &&
-    x.password === p &&
-    x.phone.replace(/\D/g, "") === ph
-  );
-
-  if (!user) {
-    alert("Login gagal. Akaun tidak dijumpai.");
-    return;
-  }
-
-  setLoggedIn(user);
-  location.href = "request.html";
+function getCurrentUser() {
+  return JSON.parse(sessionStorage.getItem("eco_user") || "null");
 }
 
 // ====================================
 //  SIGN UP
 // ====================================
+
 function handleSignup(e) {
   e.preventDefault();
 
-  const u = signupUsername.value.trim();
-  const p = signupPassword.value.trim();
-  const ph = signupPhone.value.trim();
+  const username = signupUsername.value.trim();
+  const phone = signupPhone.value.trim();
+  const password = signupPassword.value.trim();
 
-  const users = getUsers();
-  if (users.find(x => x.username === u)) {
-    alert("Username sudah digunakan.");
+  if (!username || !phone || !password) {
+    alert("Sila isi semua maklumat.");
     return;
   }
 
-  users.push(new User(u, ph, p));
-  saveUsers(users);
+  const users = getUsers();
+  const exists = users.find(u =>
+    u.username.toLowerCase() === username.toLowerCase() ||
+    u.phone.replace(/\D/g, "") === phone.replace(/\D/g, "")
+  );
 
-  alert("Pendaftaran berjaya.");
-  location.href = "index.html";
+  if (exists) {
+    alert("Username atau nombor telefon sudah digunakan.");
+    return;
+  }
+
+  addUser(new User(username, phone, password));
+  alert("Sign up berjaya. Sila log masuk.");
+  window.location.href = "index.html";
 }
 
 // ====================================
-//  MAP
+//  LOGIN
 // ====================================
-function initMapPicker() {
-  if (!window.L) return;
 
-  const map = L.map("map").setView([3.139, 101.6869], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+function handleLogin(e) {
+  e.preventDefault();
 
-  let marker;
-  map.on("click", e => {
-    if (marker) marker.remove();
-    marker = L.marker(e.latlng).addTo(map);
-    locationLat.value = e.latlng.lat;
-    locationLng.value = e.latlng.lng;
-    locationDisplay.value = `Lokasi: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-  });
+  const username = document.getElementById("username").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!username || !phone || !password) {
+    alert("Sila isi semua maklumat.");
+    return;
+  }
+
+  const user = findUser(username, phone, password);
+  if (!user) {
+    alert("Login gagal. Akaun tidak dijumpai.");
+    return;
+  }
+
+  loginUser(user);
+  window.location.href = "request.html";
 }
 
 // ====================================
-//  REQUEST SUBMIT
+//  REQUEST
 // ====================================
+
 function handleRequestSubmit(e) {
   e.preventDefault();
 
-  const rows = document.querySelectorAll(".item-row");
-  if (!rows.length) return alert("Tambah sekurang-kurangnya satu item.");
-
-  const items = [];
-  const used = new Set();
-
-  for (const r of rows) {
-    const m = r.querySelector(".material").value;
-    const w = parseFloat(r.querySelector(".weight").value);
-
-    if (!m || !w || w <= 0) return alert("Maklumat item tidak lengkap.");
-    if (used.has(m)) return alert("Jenis barang tidak boleh sama.");
-
-    used.add(m);
-    items.push({ material: m, weightKg: w });
+  if (!isLoggedIn()) {
+    alert("Anda perlu log masuk dahulu.");
+    window.location.href = "index.html";
+    return;
   }
 
-  const req = new PickupRequest(getUser(), items);
+  const material = material.value;
+  const weight = parseFloat(weight.value);
 
-  if (locationLat.value && locationLng.value) {
-    req.location = {
-      lat: parseFloat(locationLat.value),
-      lng: parseFloat(locationLng.value)
-    };
+  if (!material || weight <= 0) {
+    alert("Sila isi maklumat request dengan betul.");
+    return;
   }
 
-  saveRequest(req);
-  location.href = "calculate.html";
+  const request = new PickupRequest(getCurrentUser(), material, weight);
+  sessionStorage.setItem("eco_request", JSON.stringify(request));
+
+  window.location.href = "calculate.html";
 }
 
 // ====================================
-//  DISPLAY ORDER
+//  RESIT
 // ====================================
-function displayCalculation() {
-  if (!isLoggedIn()) return;
 
-  const req = getRequest();
-  const calc = calculateMultipleItems(req.items);
+function displayReceipt() {
+  if (!isLoggedIn()) {
+    document.body.innerHTML = "<h3>Sila log masuk dahulu.</h3>";
+    return;
+  }
 
-  const itemsHtml = calc.breakdown.map(i => `
-    <li>${i.material} – ${i.weightKg}kg → RM ${i.itemRM.toFixed(2)}</li>
-  `).join("");
+  const data = JSON.parse(sessionStorage.getItem("eco_request"));
+  if (!data) {
+    document.body.innerHTML = "<h3>Tiada order.</h3>";
+    return;
+  }
 
-  const waText = encodeURIComponent(
-`EcoRecycle Pickup Order
-${itemsHtml.replace(/<[^>]+>/g, "")}
-Jumlah: RM ${calc.totalRM.toFixed(2)}`
-  );
+  const info = MATERIAL_RATES[data.material];
+  const rm = (data.weightKg * info.rate).toFixed(2);
+  const pts = data.weightKg * info.pointsPerKg;
 
-  calcContainer.innerHTML = `
+  document.getElementById("calcContainer").innerHTML = `
     <h2>Order Pickup</h2>
-    <ul>${itemsHtml}</ul>
-    <h4>Jumlah: RM ${calc.totalRM.toFixed(2)}</h4>
-    <a class="btn btn-success" target="_blank"
-      href="https://wa.me/${ADMIN_WA_NUMBER}?text=${waText}">
-      Hantar WhatsApp
-    </a>
+    <p>User: ${data.user.username}</p>
+    <p>Telefon: ${data.user.phone}</p>
+    <p>Material: ${data.material}</p>
+    <p>Berat: ${data.weightKg} kg</p>
+    <p>Insentif: RM ${rm}</p>
+    <p>Mata: ${pts}</p>
   `;
 }
 
 // ====================================
 //  INIT
 // ====================================
+
 document.addEventListener("DOMContentLoaded", () => {
-  if (document.getElementById("loginForm")) {
-    logout();
-    loginForm.onsubmit = handleLogin;
+  const loginForm = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
+  const requestForm = document.getElementById("requestForm");
+  const calcContainer = document.getElementById("calcContainer");
+
+  // LOGIN PAGE → ALWAYS LOG OUT
+  if (loginForm) {
+    logoutUser();
+    loginForm.addEventListener("submit", handleLogin);
   }
 
-  if (document.getElementById("signupForm")) {
-    signupForm.onsubmit = handleSignup;
+  if (signupForm) {
+    signupForm.addEventListener("submit", handleSignup);
   }
 
-  if (document.getElementById("requestForm")) {
-    if (!isLoggedIn()) return location.href = "index.html";
-    initMapPicker();
-    requestForm.onsubmit = handleRequestSubmit;
+  if (requestForm) {
+    if (!isLoggedIn()) {
+      alert("Anda perlu log masuk dahulu.");
+      window.location.href = "index.html";
+      return;
+    }
+    requestForm.addEventListener("submit", handleRequestSubmit);
   }
 
-  if (document.getElementById("calcContainer")) {
-    displayCalculation();
+  if (calcContainer) {
+    displayReceipt();
   }
 });
