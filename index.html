@@ -14,24 +14,20 @@
 </head>
 <body>
 
-  <!-- VIDEO BACKGROUND -->
-  <video autoplay muted loop playsinline class="bg-video">
-    <source src="eco-bg.mp4" type="video/mp4">
-    Your browser does not support HTML5 video.
-  </video>
+  <!-- ANIMATED BACKGROUND -->
+  <div class="login-bg"></div>
 
-  <!-- DARK OVERLAY -->
-  <div class="bg-overlay"></div>
-
-  <!-- LOGIN CONTAINER -->
+  <!-- LOGIN WRAPPER -->
   <div class="login-wrapper">
     <div class="login-card">
 
-      <!-- LOGO -->
+      <!-- LOGO + TITLE -->
       <div class="text-center mb-4">
-        <div class="eco-logo">♻️</div>
+        <div class="eco-logo mb-2">♻️</div>
         <h2 class="eco-title">EcoRecycle</h2>
-        <p class="eco-subtitle">Pickup Kitar Semula Komuniti</p>
+        <p class="eco-subtitle">
+          Pickup Kitar Semula Komuniti
+        </p>
       </div>
 
       <!-- LOGIN FORM -->
@@ -43,6 +39,7 @@
             id="username"
             class="form-control"
             required
+            autocomplete="username"
           >
         </div>
 
@@ -54,6 +51,7 @@
             class="form-control"
             placeholder="contoh: 60123456789"
             required
+            autocomplete="tel"
           >
         </div>
 
@@ -64,6 +62,7 @@
             id="password"
             class="form-control"
             required
+            autocomplete="current-password"
           >
         </div>
 
@@ -72,14 +71,14 @@
         </button>
       </form>
 
-      <!-- SIGN UP (DALAM KOTAK) -->
+      <!-- SIGN UP LINK (DALAM KOTAK LOGIN) -->
       <div class="text-center small">
         Belum ada akaun?
         <a href="signup.html" class="signup-link">Daftar Akaun</a>
       </div>
 
       <div class="login-note text-center mt-3">
-        Sistem demo EcoRecycle. Data tidak disimpan secara kekal.
+        Maklumat login hanya digunakan untuk sesi demo sistem EcoRecycle.
       </div>
 
     </div>
