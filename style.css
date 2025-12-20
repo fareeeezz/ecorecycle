@@ -168,15 +168,18 @@ body.app-body{
 }
 
 /* Request Page UI (kekal guna class yang dah ada) */
-.request-hero .request-title{
-  color: #fff;
-  font-weight: 900;
-  letter-spacing: 0.3px;
+.request-title{
+  color: #000 !important;
+  font-weight: 800 !important;     /* extra bold */
+  opacity: 1 !important;
+  text-shadow: none !important;    /* buang efek pudar */
 }
-.request-hero .request-subtitle{
-  color: rgba(255,255,255,0.85);
-  max-width: 860px;
-  margin: 0 auto;
+
+/* kalau subtitle pun nak hitam jelas */
+.request-subtitle{
+  color: #000 !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
 }
 
 .request-card{
