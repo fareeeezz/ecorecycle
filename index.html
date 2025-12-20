@@ -4,25 +4,33 @@
   <meta charset="UTF-8">
   <title>EcoRecycle – Login</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<body class="login-page">
-
-  <!-- BACKGROUND IMAGE / VIDEO -->
+  <!-- ANIMATED BACKGROUND -->
   <div class="login-bg"></div>
 
-  <!-- LOGIN CARD -->
+  <!-- LOGIN WRAPPER -->
   <div class="login-wrapper">
-    <div class="login-card shadow-lg">
+    <div class="login-card">
 
+      <!-- LOGO + TITLE -->
       <div class="text-center mb-4">
-        <div class="login-logo">♻️</div>
-        <h3 class="mb-1">EcoRecycle</h3>
-        <p class="text-muted small">Pickup Kitar Semula Komuniti</p>
+        <div class="eco-logo mb-2">♻️</div>
+        <h2 class="eco-title">EcoRecycle</h2>
+        <p class="eco-subtitle">
+          Pickup Kitar Semula Komuniti
+        </p>
       </div>
 
+      <!-- LOGIN FORM -->
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label">Username</label>
@@ -30,8 +38,8 @@
             type="text"
             id="username"
             class="form-control"
-            autocomplete="username"
             required
+            autocomplete="username"
           >
         </div>
 
@@ -42,8 +50,8 @@
             id="phone"
             class="form-control"
             placeholder="contoh: 60123456789"
-            autocomplete="tel"
             required
+            autocomplete="tel"
           >
         </div>
 
@@ -53,8 +61,8 @@
             type="password"
             id="password"
             class="form-control"
-            autocomplete="current-password"
             required
+            autocomplete="current-password"
           >
         </div>
 
@@ -63,16 +71,20 @@
         </button>
       </form>
 
-      <div class="text-center">
-        <span class="small">Belum ada akaun?</span><br>
-        <a href="signup.html" class="signup-link">
-          Daftar Akaun Baru
-        </a>
+      <!-- SIGN UP LINK (DALAM KOTAK LOGIN) -->
+      <div class="text-center small">
+        Belum ada akaun?
+        <a href="signup.html" class="signup-link">Daftar Akaun</a>
+      </div>
+
+      <div class="login-note text-center mt-3">
+        Maklumat login hanya digunakan untuk sesi demo sistem EcoRecycle.
       </div>
 
     </div>
   </div>
 
+  <!-- APP JS (JANGAN UBAH) -->
   <script src="app.js"></script>
 </body>
 </html>
