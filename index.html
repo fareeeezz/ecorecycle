@@ -3,105 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <title>EcoRecycle – Login</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="app-body">
 
-  <!-- VIDEO BACKGROUND -->
-  <video autoplay muted loop playsinline id="bgVideo">
-    <source src="eco-bg.mp4" type="video/mp4">
-  </video>
+<body class="login-page">
 
-  <!-- HEADER -->
-  <header class="eco-header">
-    <div class="container d-flex justify-content-between align-items-center py-2">
-      <div class="d-flex align-items-center gap-2">
-        <div class="eco-logo-circle">♻️</div>
-        <div>
-          <div class="eco-title">EcoRecycle</div>
-          <div class="eco-subtitle">Pickup Kitar Semula Komuniti</div>
+  <!-- BACKGROUND IMAGE / VIDEO -->
+  <div class="login-bg"></div>
+
+  <!-- LOGIN CARD -->
+  <div class="login-wrapper">
+    <div class="login-card shadow-lg">
+
+      <div class="text-center mb-4">
+        <div class="login-logo">♻️</div>
+        <h3 class="mb-1">EcoRecycle</h3>
+        <p class="text-muted small">Pickup Kitar Semula Komuniti</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input
+            type="text"
+            id="username"
+            class="form-control"
+            autocomplete="username"
+            required
+          >
         </div>
-      </div>
 
-      <nav class="eco-nav d-none d-md-flex gap-3">
-  <a href="index.html" class="eco-nav-link eco-nav-link-active">Login</a>
-  <a href="signup.html" class="eco-nav-link">Sign Up</a>
-  <a href="request.html" class="eco-nav-link">Request Pickup</a>
-  <a href="calculate.html" class="eco-nav-link">Resit</a>
-</nav>
-
-
-  <!-- CONTENT LOGIN -->
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <h1 class="mb-2 text-center">Pickup Barangan Kitar Semula</h1>
-        <p class="text-center text-muted mb-4">
-          Platform untuk mengumpul barangan kitar semula daripada komuniti. Collector EcoRecycle
-          akan datang pickup dan pengguna menerima insentif.
-        </p>
-      </div>
-
-      <div class="col-md-6">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title mb-3 text-center">Log Masuk</h5>
-
-            <form id="loginForm" onsubmit="return handleLogin(event);">
-              <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="username"
-                  autocomplete="username"
-                  required
-                  placeholder="contoh: fareez_eco"
-                >
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Nombor Telefon (WhatsApp)</label>
-                <input
-                  type="tel"
-                  class="form-control"
-                  id="phone"
-                  placeholder="contoh: 60123456789"
-                  autocomplete="tel"
-                  required
-                >
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Kata Laluan</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  id="password"
-                  autocomplete="current-password"
-                  required
-                  placeholder="Masukkan kata laluan"
-                >
-              </div>
-
-              <button type="submit" class="btn btn-success w-100">
-                Log Masuk
-              </button>
-
-              <p class="text-muted small text-center mt-2 mb-0">
-                Maklumat login hanya digunakan untuk sesi demo sistem EcoRecycle.
-              </p>
-            </form>
-
-          </div>
+        <div class="mb-3">
+          <label class="form-label">Nombor Telefon (WhatsApp)</label>
+          <input
+            type="tel"
+            id="phone"
+            class="form-control"
+            placeholder="contoh: 60123456789"
+            autocomplete="tel"
+            required
+          >
         </div>
+
+        <div class="mb-3">
+          <label class="form-label">Kata Laluan</label>
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn btn-success w-100 mb-3">
+          Log Masuk
+        </button>
+      </form>
+
+      <div class="text-center">
+        <span class="small">Belum ada akaun?</span><br>
+        <a href="signup.html" class="signup-link">
+          Daftar Akaun Baru
+        </a>
       </div>
+
     </div>
   </div>
 
-  <!-- JS -->
   <script src="app.js"></script>
 </body>
 </html>
-
