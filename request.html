@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EcoRecycle – Request Pickup</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Leaflet CSS -->
+  <!-- Leaflet CSS (untuk peta) -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -24,7 +22,6 @@
   <video autoplay muted loop playsinline id="bgVideo">
     <source src="eco-bg.mp4" type="video/mp4">
   </video>
-  <div class="bg-overlay"></div>
 
   <!-- HEADER -->
   <header class="eco-header">
@@ -54,15 +51,15 @@
         <div class="request-hero text-center mb-4">
           <h1 class="request-title">Request Pickup</h1>
           <p class="request-subtitle">
-            Isi maklumat barangan kitar semula anda. Sistem akan mengira insentif &amp; mata ganjaran
-            secara automatik mengikut jenis material, berat dan lokasi pickup.
+            Isi maklumat barangan kitar semula anda. Anda boleh tambah sehingga <strong>5 jenis barang</strong>
+            dalam satu order. Sistem akan mengira insentif &amp; mata ganjaran secara automatik.
           </p>
         </div>
 
         <div class="card request-card shadow-lg">
           <div class="row g-0 align-items-stretch">
 
-            <!-- KIRI -->
+            <!-- KIRI: INFO -->
             <div class="col-lg-5 request-card-left border-end">
               <div class="p-4 h-100 d-flex flex-column justify-content-between">
                 <div>
@@ -73,8 +70,8 @@
                     Ikuti langkah di bawah sebelum hantar:
                   </p>
                   <ul class="request-steps small">
-                    <li>Pilih jenis barangan kitar semula.</li>
-                    <li>Masukkan anggaran berat dalam kilogram (kg).</li>
+                    <li>Pilih jenis barangan kitar semula (boleh lebih dari 1).</li>
+                    <li>Masukkan anggaran berat setiap jenis dalam kilogram (kg).</li>
                     <li>Klik pada peta untuk <strong>pin lokasi pickup</strong>.</li>
                     <li>Tekan <strong>Hantar &amp; Kira Insentif</strong>.</li>
                   </ul>
@@ -95,38 +92,64 @@
               </div>
             </div>
 
-            <!-- KANAN -->
+            <!-- KANAN: FORM -->
             <div class="col-lg-7">
               <div class="p-4">
-                <!-- ID requestForm KEKAL -->
                 <form id="requestForm">
-                  <div class="mb-3">
-                    <label class="form-label">Jenis Barang</label>
-                    <select class="form-select" id="material" required>
-                      <option value="">Pilih...</option>
-                      <option value="Plastik">Plastik</option>
-                      <option value="Kertas">Kertas</option>
-                      <option value="Tin">Tin / Aluminium</option>
-                      <option value="Kaca">Kaca</option>
-                      <option value="Elektronik">Barangan Elektronik (e-waste)</option>
-                      <option value="Minyak Masak Terpakai">Minyak Masak Terpakai</option>
-                    </select>
+
+                  <!-- BARU: MULTI ITEM SECTION -->
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div>
+                      <div class="fw-semibold">Senarai Jenis Barang</div>
+                      <div class="text-muted small">Maksimum 5 jenis barang (tak boleh sama jenis).</div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-success btn-sm" id="addItemBtn">
+                      + Tambah Jenis Barang
+                    </button>
                   </div>
 
-                  <div class="mb-3">
-                    <label class="form-label">Anggaran Berat (kg)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0.1"
-                      class="form-control"
-                      id="weight"
-                      placeholder="Contoh: 2.5"
-                      required
-                    >
+                  <!-- Container untuk row item -->
+                  <div id="multiItemsContainer" class="mb-3">
+                    <!-- Row pertama (wajib ada) -->
+                    <div class="multi-item-row border rounded-3 p-3 mb-3">
+                      <div class="row g-2 align-items-end">
+                        <div class="col-12 col-md-7">
+                          <label class="form-label mb-1">Jenis Barang</label>
+                          <select class="form-select material-item" required>
+                            <option value="">Pilih...</option>
+                            <option value="Plastik">Plastik</option>
+                            <option value="Kertas">Kertas</option>
+                            <option value="Tin">Tin / Aluminium</option>
+                            <option value="Kaca">Kaca</option>
+                            <option value="Elektronik">Barangan Elektronik (e-waste)</option>
+                            <option value="Minyak Masak Terpakai">Minyak Masak Terpakai</option>
+                          </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                          <label class="form-label mb-1">Berat (kg)</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            min="0.1"
+                            class="form-control weight-item"
+                            placeholder="Contoh: 2.5"
+                            required
+                          >
+                        </div>
+
+                        <div class="col-12 col-md-1 d-flex justify-content-end">
+                          <!-- untuk row pertama, button remove disabled -->
+                          <button type="button" class="btn btn-outline-secondary btn-sm removeItemBtn" disabled title="Row pertama tidak boleh dibuang">
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <!-- MAP -->
+                  <!-- LOKASI GPS / MAP -->
                   <div class="mb-3">
                     <label class="form-label">Lokasi Pickup (Pin di Peta)</label>
                     <small class="text-muted d-block mb-1">
@@ -143,6 +166,7 @@
                       readonly
                       placeholder="Belum ada lokasi. Klik pada peta untuk pin lokasi."
                     >
+                    <!-- simpan koordinat sebenar -->
                     <input type="hidden" id="locationLat">
                     <input type="hidden" id="locationLng">
                   </div>
@@ -166,8 +190,84 @@
     </div>
   </main>
 
-  <!-- Leaflet JS + app.js -->
+  <!-- Leaflet JS (peta) + app.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
+
+  <!-- Script kecil khusus untuk Request page (UI multi-items sahaja) -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const addBtn = document.getElementById("addItemBtn");
+      const container = document.getElementById("multiItemsContainer");
+
+      if (!addBtn || !container) return;
+
+      function createRow(isFirstRow) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "multi-item-row border rounded-3 p-3 mb-3";
+
+        wrapper.innerHTML = `
+          <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-7">
+              <label class="form-label mb-1">Jenis Barang</label>
+              <select class="form-select material-item" ${isFirstRow ? "required" : ""}>
+                <option value="">Pilih...</option>
+                <option value="Plastik">Plastik</option>
+                <option value="Kertas">Kertas</option>
+                <option value="Tin">Tin / Aluminium</option>
+                <option value="Kaca">Kaca</option>
+                <option value="Elektronik">Barangan Elektronik (e-waste)</option>
+                <option value="Minyak Masak Terpakai">Minyak Masak Terpakai</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label mb-1">Berat (kg)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                class="form-control weight-item"
+                placeholder="Contoh: 2.5"
+                ${isFirstRow ? "required" : ""}
+              >
+            </div>
+
+            <div class="col-12 col-md-1 d-flex justify-content-end">
+              <button type="button" class="btn btn-outline-danger btn-sm removeItemBtn">
+                ✕
+              </button>
+            </div>
+          </div>
+        `;
+
+        // remove handler
+        const removeBtn = wrapper.querySelector(".removeItemBtn");
+        if (removeBtn) {
+          removeBtn.addEventListener("click", function () {
+            wrapper.remove();
+          });
+        }
+
+        return wrapper;
+      }
+
+      addBtn.addEventListener("click", function () {
+        const rows = container.querySelectorAll(".multi-item-row");
+        if (rows.length >= 5) {
+          alert("Maksimum 5 jenis barang sahaja.");
+          return;
+        }
+        container.appendChild(createRow(false));
+      });
+
+      // attach remove handler untuk row pertama (disabled memang tak perlu)
+      const firstRowRemove = container.querySelector(".multi-item-row .removeItemBtn");
+      if (firstRowRemove) {
+        // kekalkan disabled
+      }
+    });
+  </script>
+
 </body>
 </html>
