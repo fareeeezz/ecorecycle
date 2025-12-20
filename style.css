@@ -1,258 +1,422 @@
-/* =========================================
-   GLOBAL / RESET
-========================================= */
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
+/* =========================================================
+   EcoRecycle - GLOBAL THEME (FULL STYLE.CSS)
+   NOTE: CSS only. No JS function changes.
+   ========================================================= */
 
-/* =========================================
-   FULLSCREEN VIDEO BACKGROUND
-========================================= */
+/* -------------------------
+   RESET / BASE
+------------------------- */
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #111;
+  background: #0b0f0c; /* fallback kalau video tak load */
+  overflow-x: hidden;
+}
+
+/* Utility */
+.text-center { text-align: center; }
+.small { font-size: 0.92rem; }
+.fw-semibold { font-weight: 600; }
+.shadow-lg { box-shadow: 0 18px 45px rgba(0,0,0,.18) !important; }
+.shadow-sm { box-shadow: 0 10px 24px rgba(0,0,0,.12) !important; }
+
+/* -------------------------
+   VIDEO BACKGROUND (FULL PAGE)
+   Pastikan setiap page ada:
+   <video autoplay muted loop playsinline id="bgVideo">...
+------------------------- */
 #bgVideo {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   object-fit: cover;
   z-index: -2;
+  filter: saturate(1.05) contrast(1.05);
 }
 
-.bg-overlay{
+/* overlay gelap sikit supaya teks jelas */
+.app-body::before {
+  content: "";
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
   z-index: -1;
+  background: rgba(255,255,255,0.70); /* macam “frosted” putih lembut */
+  backdrop-filter: blur(1px);
 }
 
-/* =========================================
-   LOGIN / SIGNUP PAGE
-========================================= */
-body.login-page{
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+/* Kalau ada page yang nak gelap lagi, boleh tambah class ini dekat body:
+   <body class="app-body app-body-dark">
+*/
+.app-body-dark::before {
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(1.5px);
 }
 
-.auth-wrap{
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.auth-card{
-  width: 100%;
-  max-width: 520px;
-  background: rgba(255,255,255,0.94);
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-  backdrop-filter: blur(6px);
-}
-
-.auth-brand{
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-}
-
-.brand-icon{
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #eaf7ef;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.brand-title{
-  font-weight: 800;
-  font-size: 22px;
-  line-height: 1.1;
-}
-
-.brand-subtitle{
-  font-size: 13px;
-  opacity: 0.75;
-}
-
-.auth-heading{
-  text-align: center;
-  margin: 12px 0 18px;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.btn-eco{
-  background: #198754 !important;
-  color: #fff !important;
-  font-weight: 700;
-  border: none !important;
-  padding: 12px 14px;
-  border-radius: 10px;
-}
-.btn-eco:hover{
-  background: #157347 !important;
-}
-
-.auth-links{
-  text-align: center;
-  margin-top: 12px;
-  font-size: 14px;
-}
-.auth-links a{ font-weight: 700; }
-
-.auth-footnote{
-  text-align: center;
-  margin-top: 12px;
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-/* =========================================
-   APP PAGES (REQUEST / CALCULATE)
-========================================= */
-body.app-body{
-  min-height: 100vh;
-  color: #111;
-}
-
-.eco-header{
-  background: rgba(25,135,84,0.92);
-  backdrop-filter: blur(6px);
-  color: #fff;
+/* -------------------------
+   HEADER / NAV BAR (GREEN)
+------------------------- */
+.eco-header {
   position: sticky;
   top: 0;
   z-index: 50;
+  background: #1f8a5a;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
 }
 
-.eco-logo-circle{
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.eco-header .container {
+  max-width: 1200px;
 }
 
-.eco-title{
-  font-weight: 800;
+.eco-logo-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+  display: grid;
+  place-items: center;
   font-size: 18px;
-  line-height: 1;
 }
 
-.eco-subtitle{
-  font-size: 12px;
-  opacity: 0.9;
+.eco-title {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  font-size: 1.05rem;
+  line-height: 1.1;
 }
 
-.eco-nav-link{
-  color: rgba(255,255,255,0.92);
+.eco-subtitle {
+  color: rgba(255,255,255,0.88);
+  font-size: 0.86rem;
+  line-height: 1.1;
+}
+
+/* nav links */
+.eco-nav-link {
+  color: rgba(255,255,255,0.88);
   text-decoration: none;
-  font-weight: 700;
-  padding: 6px 10px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 999px;
+  transition: all .15s ease-in-out;
+}
+
+.eco-nav-link:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+}
+
+.eco-nav-link-active {
+  color: #1f8a5a;
+  background: #fff;
+}
+
+/* -------------------------
+   BUTTON THEME
+------------------------- */
+.btn-request,
+.btn-eco-primary {
+  background: #1f8a5a !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  letter-spacing: 0.2px;
+  transition: transform .12s ease, filter .12s ease;
+}
+
+.btn-request:hover,
+.btn-eco-primary:hover {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+}
+
+.btn-eco-outline {
+  background: transparent !important;
+  border: 2px solid #1f8a5a !important;
+  color: #1f8a5a !important;
+  font-weight: 800 !important;
+  padding: 10px 14px !important;
+  border-radius: 12px !important;
+}
+
+.btn-eco-outline:hover {
+  background: rgba(31,138,90,0.10) !important;
+}
+
+/* Small icon button (remove item row) */
+.btn-icon {
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease;
 }
-.eco-nav-link:hover{
-  background: rgba(255,255,255,0.14);
-  color: #fff;
-}
-.eco-nav-link-active{
-  background: rgba(255,255,255,0.18);
-  color: #fff;
+.btn-icon:hover { transform: translateY(-1px); filter: brightness(0.98); }
+
+/* -------------------------
+   FORMS / INPUTS
+------------------------- */
+.form-control, .form-select {
+  border-radius: 12px !important;
+  padding: 11px 12px !important;
+  border: 1px solid rgba(0,0,0,0.15) !important;
 }
 
-/* Request Page UI (kekal guna class yang dah ada) */
-.request-title{
-  color: #000 !important;
-  font-weight: 800 !important;     /* extra bold */
-  opacity: 1 !important;
-  text-shadow: none !important;    /* buang efek pudar */
+.form-control:focus, .form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(31,138,90,0.20) !important;
+  border-color: rgba(31,138,90,0.55) !important;
 }
 
-/* kalau subtitle pun nak hitam jelas */
-.request-subtitle{
-  color: #000 !important;
-  opacity: 1 !important;
-  font-weight: 500 !important;
+label.form-label {
+  font-weight: 700;
 }
 
-.request-card{
-  background: rgba(255,255,255,0.94);
-  border-radius: 18px;
-  overflow: hidden;
-  backdrop-filter: blur(6px);
+/* -------------------------
+   PAGE LAYOUT HELPERS
+------------------------- */
+.container {
+  width: 100%;
 }
 
-.request-card-left{
-  background: rgba(234,247,239,0.9);
+/* card base */
+.card {
+  border-radius: 18px !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
 }
 
-.request-steps{
-  padding-left: 18px;
+/* -------------------------
+   LOGIN PAGE (kalau ada kelas khusus)
+   (Tak mengganggu kalau tak digunakan)
+------------------------- */
+.auth-main {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 40px 14px;
 }
 
-.request-rate-box{
-  background: rgba(255,255,255,0.9);
-  border-radius: 14px;
-  padding: 14px;
-  border: 1px solid rgba(0,0,0,0.06);
+.auth-card {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 22px;
+  padding: 28px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
 }
 
-.request-rate-label{
-  font-weight: 800;
-  color: #198754;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+.auth-title {
+  font-weight: 900;
+  font-size: 2rem;
+  margin: 0 0 6px;
+  text-align: center;
 }
 
-.request-rate-value{
-  font-weight: 800;
+.auth-subtitle {
+  text-align: center;
+  color: rgba(0,0,0,0.65);
+  margin: 0 0 18px;
+}
+
+/* -------------------------
+   REQUEST PAGE
+------------------------- */
+.request-main {
+  max-width: 1200px;
+}
+
+/* hero text */
+.request-hero {
   margin-top: 6px;
 }
 
-.request-rate-points{
-  font-size: 13px;
-  opacity: 0.85;
+.request-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 6px;
+  color: #000 !important;       /* ✅ hitam jelas */
+  opacity: 1 !important;
+  text-shadow: none !important;
 }
 
-.btn-request{
-  background: #198754 !important;
-  color: #fff !important;
+.request-subtitle {
+  color: #000 !important;       /* ✅ hitam jelas */
+  opacity: 1 !important;
+  font-weight: 500;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+/* main request card */
+.request-card {
+  overflow: hidden;
+  background: rgba(255,255,255,0.92);
+  border-radius: 22px !important;
+}
+
+.request-card-left {
+  background: rgba(245, 251, 248, 0.92);
+}
+
+.request-steps {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.request-steps li {
+  margin-bottom: 8px;
+}
+
+.request-rate-box {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.request-rate-label {
+  font-weight: 900;
+  color: #1f8a5a;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  font-size: 0.84rem;
+}
+
+.request-rate-value {
   font-weight: 800;
-  border: none !important;
-  padding: 12px 14px;
-  border-radius: 12px;
-}
-.btn-request:hover{
-  background: #157347 !important;
+  margin-bottom: 8px;
 }
 
-/* Leaflet map sizes */
-#map{
+.request-rate-points {
+  color: rgba(0,0,0,0.70);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+/* hint box */
+.request-hint {
+  border-radius: 14px !important;
+}
+
+/* -------------------------
+   MULTI ITEM UI (kalau you guna)
+------------------------- */
+.multi-items-wrap {
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(255,255,255,0.86);
+}
+
+.multi-items-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.multi-items-title {
+  font-weight: 900;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.multi-items-note {
+  color: rgba(0,0,0,0.55);
+  font-size: 0.92rem;
+  margin: 0 0 10px;
+}
+
+.multi-item-row {
+  display: grid;
+  grid-template-columns: 1fr 200px 52px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+.material-item { width: 100%; }
+.weight-item { width: 100%; }
+
+@media (max-width: 992px) {
+  .multi-item-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -------------------------
+   LEAFLET MAP
+------------------------- */
+#map {
+  width: 100%;
+  height: 300px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+/* rider map di calculate page */
+#riderMap {
   width: 100%;
   height: 260px;
-  border-radius: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.12);
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.08);
 }
 
-/* Rider map in calculate page */
-#riderMap{
-  width: 100%;
-  height: 280px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.08);
+/* -------------------------
+   CALCULATE / ORDER PAGE
+------------------------- */
+#calcContainer .card {
+  background: rgba(255,255,255,0.92);
 }
 
-/* Make bootstrap cards look nicer over video */
-.card{
-  border-radius: 14px;
+#receiptCard .card-title {
+  font-weight: 900;
+}
+
+textarea.form-control[readonly] {
+  background: rgba(255,255,255,0.95) !important;
+}
+
+/* -------------------------
+   LINKS
+------------------------- */
+a { color: #1f8a5a; }
+a:hover { color: #167047; }
+
+/* -------------------------
+   RESPONSIVE tweaks
+------------------------- */
+@media (max-width: 768px) {
+  .request-title { font-size: 1.8rem; }
+  .request-subtitle { font-size: 0.98rem; }
+}
+
+/* -------------------------
+   OPTIONAL: hide horizontal scroll from leaflet tiles
+------------------------- */
+.leaflet-container {
+  font: inherit;
 }
