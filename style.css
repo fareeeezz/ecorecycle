@@ -205,5 +205,75 @@ body {
   margin-top: 8px;
 }
 
+/* ===============================
+   LOGIN PAGE STYLING
+================================ */
+
+body.login-page {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Background image / gradient */
+.login-bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+      rgba(0,0,0,0.45),
+      rgba(0,0,0,0.45)
+    ),
+    url("login-bg.jpg"); /* optional: boleh tukar gambar */
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+/* Center wrapper */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card */
+.login-card {
+  background: rgba(255,255,255,0.95);
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  border-radius: 16px;
+}
+
+/* Logo */
+.login-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #198754;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 10px;
+}
+
+/* Signup link */
+.signup-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 600;
+  color: #198754;
+  text-decoration: none;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
+
+
 
 
