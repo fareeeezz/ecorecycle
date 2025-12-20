@@ -1,4 +1,6 @@
-/* RESET */
+/* ======================
+   GLOBAL RESET
+====================== */
 * {
   box-sizing: border-box;
 }
@@ -6,87 +8,98 @@
 body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* =========================
-   ANIMATED BACKGROUND
-========================= */
-
-.login-bg {
+/* ======================
+   VIDEO BACKGROUND
+====================== */
+.bg-video {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   z-index: -1;
-
-  background: linear-gradient(
-    -45deg,
-    #6a11cb,
-    #2575fc,
-    #00c6ff,
-    #198754
-  );
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite;
 }
 
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* ======================
+   HEADER (SEMUA PAGE)
+====================== */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  z-index: 10;
 }
 
-/* =========================
-   LOGIN LAYOUT
-========================= */
-
-.login-wrapper {
-  height: 100vh;
+.app-header .logo {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: 16px;
-  padding: 30px 28px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
-  backdrop-filter: blur(6px);
-}
-
-/* =========================
-   LOGO & TEXT
-========================= */
-
-.eco-logo {
-  font-size: 42px;
-}
-
-.eco-title {
+  gap: 10px;
   font-weight: 700;
-  margin-bottom: 4px;
 }
 
-.eco-subtitle {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 0;
-}
-
-/* =========================
-   FORM
-========================= */
-
-.form-label {
+.app-header nav a {
+  color: #fff;
+  margin-left: 18px;
+  text-decoration: none;
   font-weight: 500;
-  font-size: 14px;
 }
 
-.form-control {
+.app-header nav a:hover {
+  text-decoration: underline;
+}
+
+/* ======================
+   PAGE WRAPPER
+====================== */
+.page-wrapper {
+  min-height: 100vh;
+  padding-top: 90px;
+  padding-bottom: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ======================
+   CARD (LOGIN / SIGNUP / REQUEST / ORDER)
+====================== */
+.page-card {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(255, 255, 255, 0.93);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+}
+
+/* ======================
+   FORM
+====================== */
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-control,
+.form-select {
   border-radius: 10px;
   padding: 10px 12px;
 }
@@ -96,25 +109,20 @@ body {
   font-weight: 600;
 }
 
-/* =========================
-   SIGN UP LINK
-========================= */
-
-.signup-link {
-  color: #198754;
-  font-weight: 600;
-  text-decoration: none;
+/* ======================
+   MAP
+====================== */
+#map, #riderMap {
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 6px;
 }
 
-.signup-link:hover {
-  text-decoration: underline;
-}
-
-/* =========================
-   NOTE
-========================= */
-
-.login-note {
+/* ======================
+   SMALL TEXT
+====================== */
+.small-note {
   font-size: 12px;
-  color: #777;
+  color: #666;
 }
