@@ -11,29 +11,24 @@ body {
 }
 
 /* =========================
-   ANIMATED BACKGROUND
+   VIDEO BACKGROUND
 ========================= */
 
-.login-bg {
+.bg-video {
   position: fixed;
   inset: 0;
-  z-index: -1;
-
-  background: linear-gradient(
-    -45deg,
-    #6a11cb,
-    #2575fc,
-    #00c6ff,
-    #198754
-  );
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
 }
 
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Overlay supaya teks jelas */
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: -1;
 }
 
 /* =========================
@@ -51,19 +46,20 @@ body {
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: 16px;
-  padding: 30px 28px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
+  padding: 32px 30px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
 }
 
 /* =========================
-   LOGO & TEXT
+   LOGO & TITLE
 ========================= */
 
 .eco-logo {
   font-size: 42px;
+  margin-bottom: 6px;
 }
 
 .eco-title {
@@ -82,8 +78,8 @@ body {
 ========================= */
 
 .form-label {
-  font-weight: 500;
   font-size: 14px;
+  font-weight: 500;
 }
 
 .form-control {
@@ -116,5 +112,5 @@ body {
 
 .login-note {
   font-size: 12px;
-  color: #777;
+  color: #666;
 }
