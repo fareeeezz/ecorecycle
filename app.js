@@ -32,6 +32,23 @@ const MATERIAL_RATES = {
   }
 };
 
+function calculateMultipleItems(items) {
+  let totalRM = 0;
+  let totalPoints = 0;
+
+  const breakdown = (items || []).map(i => {
+    const info = MATERIAL_RATES[i.material] || { rate: RATE_PER_KG, pointsPerKg: POINTS_PER_KG };
+    const rm = i.weightKg * info.rate;
+    const pts = i.weightKg * info.pointsPerKg;
+    totalRM += rm;
+    totalPoints += pts;
+    return { ...i, rate: info.rate, pointsPerKg: info.pointsPerKg, rm, pts };
+  });
+
+  return { breakdown, totalRM, totalPoints };
+}
+
+
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
 const ADMIN_WA_NUMBER = "601111473069"; // tukar kalau perlu
 
@@ -383,122 +400,91 @@ function handleRequestSubmit(event) {
     return false;
   }
 
-  const materialEl = document.getElementById("material");
-  const weightEl   = document.getElementById("weight");
+  // ===============================
+  // MULTIPLE ITEMS (BARU)
+  // Cari semua row yang awak buat bila tekan "Tambah Jenis Barang"
+  // ===============================
+  const itemRows = document.querySelectorAll(".multi-item-row");
+  const items = [];
+
+  if (itemRows && itemRows.length > 0) {
+    itemRows.forEach(r => {
+      const m = r.querySelector(".material-item")?.value;
+      const wRaw = r.querySelector(".weight-item")?.value;
+      const w = parseFloat(wRaw);
+      if (m && !isNaN(w) && w > 0) items.push({ material: m, weightKg: w });
+    });
+  }
+
+  // ===============================
+  // FALLBACK (LAMA) - kalau page masih pakai id material/weight
+  // ===============================
+  let material = null;
+  let weight = null;
+
+  if (items.length === 0) {
+    const materialEl = document.getElementById("material");
+    const weightEl   = document.getElementById("weight");
+
+    if (!materialEl || !weightEl) {
+      alert("Ralat pada borang request. Sila refresh halaman.");
+      return false;
+    }
+
+    material = materialEl.value;
+    weight   = parseFloat(weightEl.value);
+
+    if (!material) {
+      alert("Sila pilih jenis barangan kitar semula.");
+      return false;
+    }
+    if (isNaN(weight) || weight <= 0) {
+      alert("Sila masukkan anggaran berat yang sah (lebih daripada 0).");
+      return false;
+    }
+  } else {
+    // Validasi: maksimum 5 item
+    if (items.length > 5) {
+      alert("Maksimum 5 jenis barang sahaja.");
+      return false;
+    }
+
+    // Validasi: tak boleh sama jenis berulang
+    const set = new Set(items.map(x => x.material));
+    if (set.size !== items.length) {
+      alert("Sila pilih jenis barang yang lain (tidak boleh sama).");
+      return false;
+    }
+  }
+
+  // ===============================
+  // Build request object
+  // ===============================
+  let request;
+  if (items.length > 0) {
+    request = new PickupRequest(user, null, null);
+    request.items = items;
+  } else {
+    request = new PickupRequest(user, material, weight);
+  }
+
+  // ===============================
+  // Lokasi (kekal)
+  // ===============================
   const latInput   = document.getElementById("locationLat");
   const lngInput   = document.getElementById("locationLng");
 
-  if (!materialEl || !weightEl) {
-    alert("Ralat pada borang request. Sila refresh halaman.");
-    return false;
-  }
-
-  const material = (materialEl.value || "").trim();
-  const weight   = parseFloat(weightEl.value);
-
-  if (!material) {
-    alert("Sila pilih jenis barangan kitar semula.");
-    return false;
-  }
-  if (isNaN(weight) || weight <= 0) {
-    alert("Sila masukkan anggaran berat yang sah (lebih daripada 0).");
-    return false;
-  }
-
-  // ================================
-  // MULTI ITEM: ambil item tambahan
-  // ================================
-  let items = [];
-
-  // item utama (wajib)
-  items.push({
-    material: material,
-    weightKg: weight
-  });
-
-  // ✅ FIX: ambil hanya dari container multiItemContainer sahaja
-  const multiContainer = document.getElementById("multiItemContainer");
-
-  const extraMaterialEls = multiContainer
-    ? multiContainer.querySelectorAll(".material-item")
-    : [];
-
-  const extraWeightEls = multiContainer
-    ? multiContainer.querySelectorAll(".weight-item")
-    : [];
-
-  if (extraMaterialEls && extraMaterialEls.length > 0) {
-    for (let i = 0; i < extraMaterialEls.length; i++) {
-      const m = (extraMaterialEls[i].value || "").trim();
-      const w = parseFloat(extraWeightEls[i] ? extraWeightEls[i].value : "");
-
-      // ignore row kosong
-      if (!m && (isNaN(w) || !w)) continue;
-
-      // kalau isi separuh -> error
-      if (!m) {
-        alert("Sila pilih jenis barangan untuk item tambahan.");
-        return false;
-      }
-      if (isNaN(w) || w <= 0) {
-        alert("Sila masukkan berat (kg) yang sah untuk item tambahan.");
-        return false;
-      }
-
-      items.push({
-        material: m,
-        weightKg: w
-      });
-    }
-  }
-
-  // optional: guard max 6 (1 utama + 5 tambahan)
-  if (items.length > 6) {
-    alert("Maksimum 6 jenis barang sahaja.");
-    return false;
-  }
-
-  // ================================
-  // VALIDASI DUPLICATE MATERIAL
-  // ================================
-  const chosen = items
-    .map(x => (x.material || "").trim())
-    .filter(m => m.length > 0);
-
-  const seen = new Set();
-  for (let i = 0; i < chosen.length; i++) {
-    const key = chosen[i].toLowerCase();
-    if (seen.has(key)) {
-      alert("Sila pilih jenis barang yang lain.");
-      return false;
-    }
-    seen.add(key);
-  }
-
-  // ================================
-  // Lokasi (pin map)
-  // ================================
   let location = null;
   if (latInput && lngInput && latInput.value && lngInput.value) {
-    location = {
-      lat: parseFloat(latInput.value),
-      lng: parseFloat(lngInput.value)
-    };
+    location = { lat: parseFloat(latInput.value), lng: parseFloat(lngInput.value) };
   }
-
-  // Simpan request format kekal + multi items
-  const request = new PickupRequest(user, material, weight);
-  if (location) {
-    request.location = location;
-  }
-
-  // ✅ tambah items untuk resit multi
-  request.items = items;
+  if (location) request.location = location;
 
   saveRequest(request);
   window.location.href = "calculate.html";
   return false;
 }
+
 
 
 // ====================================
