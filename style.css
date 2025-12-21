@@ -443,3 +443,51 @@ a:hover { color: #167047; }
    OPTIONAL: leaflet typography
 ------------------------- */
 .leaflet-container { font: inherit; }
+
+
+/* ==============================
+   FIX TERUS: Butang X (remove row) kemas & sama tinggi input
+   (PASTE PALING BAWAH style.css)
+============================== */
+
+/* Pastikan row align ikut bawah input */
+.multi-item-row{
+  align-items: end !important;
+}
+
+/* Target butang remove walau apa class dia */
+.multi-item-row .btn-icon,
+.multi-item-row .remove-item-btn,
+.multi-item-row button[type="button"]{
+  width: 46px !important;
+  height: 46px !important;
+  padding: 0 !important;
+
+  display: grid !important;
+  place-items: center !important;
+
+  border-radius: 12px !important;
+  border: 1px solid rgba(0,0,0,0.15) !important;
+  background: #fff !important;
+
+  /* align betul-betul sebaris input */
+  align-self: end !important;
+  margin: 0 0 2px 0 !important;
+}
+
+/* Bagi simbol X jadi cantik & center */
+.multi-item-row .btn-icon,
+.multi-item-row .remove-item-btn,
+.multi-item-row button[type="button"]{
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+/* Hover kemas */
+.multi-item-row .btn-icon:hover,
+.multi-item-row .remove-item-btn:hover,
+.multi-item-row button[type="button"]:hover{
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+}
+
