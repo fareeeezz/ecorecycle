@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>EcoRecycle – Request Pickup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Leaflet CSS (untuk peta) -->
@@ -34,11 +36,11 @@
         </div>
       </div>
 
+      <!-- Nav ikut flow selepas login -->
       <nav class="eco-nav d-none d-md-flex gap-3">
-        <a href="index.html" class="eco-nav-link">Login</a>
-        <a href="signup.html" class="eco-nav-link">Sign Up</a>
         <a href="request.html" class="eco-nav-link eco-nav-link-active">Request Pickup</a>
         <a href="calculate.html" class="eco-nav-link">Resit</a>
+        <a href="index.html" class="eco-nav-link">Logout</a>
       </nav>
     </div>
   </header>
@@ -97,7 +99,7 @@
               <div class="p-4">
                 <form id="requestForm">
 
-                  <!-- BARU: MULTI ITEM SECTION -->
+                  <!-- MULTI ITEM SECTION -->
                   <div class="d-flex align-items-center justify-content-between mb-2">
                     <div>
                       <div class="fw-semibold">Senarai Jenis Barang</div>
@@ -112,11 +114,13 @@
                   <!-- Container untuk row item -->
                   <div id="multiItemsContainer" class="mb-3">
                     <!-- Row pertama (wajib ada) -->
-                    <div class="multi-item-row border rounded-3 p-3 mb-3">
+                    <div class="multi-item-row">
                       <div class="row g-2 align-items-end">
                         <div class="col-12 col-md-7">
                           <label class="form-label mb-1">Jenis Barang</label>
-                          <select class="form-select material-item" required>
+
+                          <!-- ✅ penting: letak ID untuk app.js (elak ralat borang request) -->
+                          <select class="form-select material-item" id="material" required>
                             <option value="">Pilih...</option>
                             <option value="Plastik">Plastik</option>
                             <option value="Kertas">Kertas</option>
@@ -129,19 +133,28 @@
 
                         <div class="col-12 col-md-4">
                           <label class="form-label mb-1">Berat (kg)</label>
+
+                          <!-- ✅ penting: letak ID untuk app.js (elak ralat borang request) -->
                           <input
                             type="number"
                             step="0.1"
                             min="0.1"
                             class="form-control weight-item"
+                            id="weight"
                             placeholder="Contoh: 2.5"
                             required
                           >
                         </div>
 
-                        <div class="col-12 col-md-1 d-flex justify-content-end">
-                          <!-- untuk row pertama, button remove disabled -->
-                          <button type="button" class="btn btn-outline-secondary btn-sm removeItemBtn" disabled title="Row pertama tidak boleh dibuang">
+                        <!-- ✅ FIX: align X dengan input -->
+                        <div class="col-12 col-md-1 d-flex justify-content-end align-items-end">
+                          <button
+                            type="button"
+                            class="btn-icon removeItemBtn"
+                            disabled
+                            title="Row pertama tidak boleh dibuang"
+                            aria-label="Buang"
+                          >
                             ✕
                           </button>
                         </div>
@@ -202,15 +215,15 @@
 
       if (!addBtn || !container) return;
 
-      function createRow(isFirstRow) {
+      function createRow() {
         const wrapper = document.createElement("div");
-        wrapper.className = "multi-item-row border rounded-3 p-3 mb-3";
+        wrapper.className = "multi-item-row";
 
         wrapper.innerHTML = `
           <div class="row g-2 align-items-end">
             <div class="col-12 col-md-7">
               <label class="form-label mb-1">Jenis Barang</label>
-              <select class="form-select material-item" ${isFirstRow ? "required" : ""}>
+              <select class="form-select material-item">
                 <option value="">Pilih...</option>
                 <option value="Plastik">Plastik</option>
                 <option value="Kertas">Kertas</option>
@@ -229,19 +242,17 @@
                 min="0.1"
                 class="form-control weight-item"
                 placeholder="Contoh: 2.5"
-                ${isFirstRow ? "required" : ""}
               >
             </div>
 
-            <div class="col-12 col-md-1 d-flex justify-content-end">
-              <button type="button" class="btn btn-outline-danger btn-sm removeItemBtn">
+            <div class="col-12 col-md-1 d-flex justify-content-end align-items-end">
+              <button type="button" class="btn-icon removeItemBtn" aria-label="Buang">
                 ✕
               </button>
             </div>
           </div>
         `;
 
-        // remove handler
         const removeBtn = wrapper.querySelector(".removeItemBtn");
         if (removeBtn) {
           removeBtn.addEventListener("click", function () {
@@ -258,14 +269,8 @@
           alert("Maksimum 5 jenis barang sahaja.");
           return;
         }
-        container.appendChild(createRow(false));
+        container.appendChild(createRow());
       });
-
-      // attach remove handler untuk row pertama (disabled memang tak perlu)
-      const firstRowRemove = container.querySelector(".multi-item-row .removeItemBtn");
-      if (firstRowRemove) {
-        // kekalkan disabled
-      }
     });
   </script>
 
