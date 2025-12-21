@@ -328,12 +328,12 @@ label.form-label {
 }
 
 /* -------------------------
-   MULTI ITEM UI (kalau you guna)
+   MULTI ITEM UI (kemas & align)
 ------------------------- */
 .multi-items-wrap {
   border: 1px solid rgba(0,0,0,0.10);
   border-radius: 16px;
-  padding: 14px;
+  padding: 16px;
   background: rgba(255,255,255,0.86);
 }
 
@@ -342,7 +342,7 @@ label.form-label {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .multi-items-title {
@@ -354,29 +354,66 @@ label.form-label {
 .multi-items-note {
   color: rgba(0,0,0,0.55);
   font-size: 0.92rem;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 
+/* ✅ row kemas: Jenis (besar) + Berat (tetap lebar) + X (kecil) */
 .multi-item-row {
   display: grid;
-  grid-template-columns: 1fr 200px 52px;
-  gap: 10px;
-  align-items: center;
-  padding: 10px;
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, 260px) 46px;
+  gap: 12px;
+  align-items: end;                 /* align input sama garis bawah */
+  padding: 14px;
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,0.08);
   background: #fff;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.material-item { width: 100%; }
-.weight-item { width: 100%; }
+/* kalau dalam row ada container kecil */
+.multi-item-row > div {
+  min-width: 0; /* penting supaya select tak overflow */
+}
 
+/* label dalam row jadi kemas */
+.multi-item-row label,
+.multi-item-row .form-label {
+  display: block;
+  font-weight: 800;
+  margin: 0 0 6px;
+  color: #111;
+}
+
+/* input/select full width, tak semput */
+.material-item,
+.weight-item {
+  width: 100% !important;
+}
+
+/* input berat bagi rasa “lebih lebar” & senang baca */
+.weight-item {
+  min-width: 220px;
+}
+
+/* button X kecil & center */
+.multi-item-row .btn-icon,
+.multi-item-row .remove-item-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+}
+
+/* responsive: bila mobile, turun bawah jadi 1 column */
 @media (max-width: 992px) {
   .multi-item-row {
     grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+  .weight-item {
+    min-width: 0;
   }
 }
+
 
 /* -------------------------
    LEAFLET MAP
