@@ -473,3 +473,39 @@ a:hover { color: #167047; }
 .leaflet-container {
   font: inherit;
 }
+
+/* ==============================
+   FIX: butang X (remove row) kemas & align
+============================== */
+
+/* Pastikan column 3 (X) align betul */
+.multi-item-row {
+  align-items: center !important;  /* override yang end */
+}
+
+/* Kalau X guna class btn-icon (yang kau ada) */
+.multi-item-row .btn-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  margin-top: 24px; /* bagi align dengan input bawah label */
+}
+
+/* Kalau button X tu sebenarnya ada class lain (remove-item-btn) */
+.multi-item-row .remove-item-btn {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  margin-top: 24px;
+}
+
+/* Icon X dalam button supaya center */
+.multi-item-row .btn-icon i,
+.multi-item-row .btn-icon svg,
+.multi-item-row .remove-item-btn i,
+.multi-item-row .remove-item-btn svg {
+  display: block;
+}
+
