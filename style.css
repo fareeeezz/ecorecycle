@@ -189,9 +189,7 @@ label.form-label {
 /* -------------------------
    PAGE LAYOUT HELPERS
 ------------------------- */
-.container {
-  width: 100%;
-}
+.container { width: 100%; }
 
 /* card base */
 .card {
@@ -200,35 +198,26 @@ label.form-label {
 }
 
 /* =========================================================
-   ✅ LOGIN PAGE CENTER FIX (ANTI-RUNAWAY)
-   Works even if Bootstrap layout changes a bit
+   LOGIN PAGE CENTER FIX
 ========================================================= */
 .auth-main {
-  /* dulu grid, sekarang flex lebih konsisten */
   min-height: calc(100vh - 72px);
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 48px 14px;
-
-  /* prevent weird stretching */
   margin: 0 auto;
 }
 
 .auth-card {
   width: min(680px, 92vw);
   max-width: 680px;
-
   background: rgba(255,255,255,0.92);
   border-radius: 22px;
   padding: 28px;
-
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 20px 60px rgba(0,0,0,.18);
-
-  /* ✅ ini yang pastikan sentiasa center */
   margin: 0 auto;
 }
 
@@ -249,51 +238,37 @@ label.form-label {
 /* -------------------------
    REQUEST PAGE
 ------------------------- */
-.request-main {
-  max-width: 1200px;
-}
+.request-main { max-width: 1200px; }
 
-/* hero text */
-.request-hero {
-  margin-top: 6px;
-}
+.request-hero { margin-top: 6px; }
 
 .request-title {
   font-size: 2.2rem;
   font-weight: 900;
   margin-bottom: 6px;
-  color: #000 !important;       /* hitam jelas */
+  color: #000 !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
 .request-subtitle {
-  color: #000 !important;       /* hitam jelas */
+  color: #000 !important;
   opacity: 1 !important;
   font-weight: 500;
   max-width: 820px;
   margin: 0 auto;
 }
 
-/* main request card */
 .request-card {
   overflow: hidden;
   background: rgba(255,255,255,0.92);
   border-radius: 22px !important;
 }
 
-.request-card-left {
-  background: rgba(245, 251, 248, 0.92);
-}
+.request-card-left { background: rgba(245, 251, 248, 0.92); }
 
-.request-steps {
-  padding-left: 18px;
-  margin: 0;
-}
-
-.request-steps li {
-  margin-bottom: 8px;
-}
+.request-steps { padding-left: 18px; margin: 0; }
+.request-steps li { margin-bottom: 8px; }
 
 .request-rate-box {
   background: #fff;
@@ -311,10 +286,7 @@ label.form-label {
   font-size: 0.84rem;
 }
 
-.request-rate-value {
-  font-weight: 800;
-  margin-bottom: 8px;
-}
+.request-rate-value { font-weight: 800; margin-bottom: 8px; }
 
 .request-rate-points {
   color: rgba(0,0,0,0.70);
@@ -322,13 +294,10 @@ label.form-label {
   line-height: 1.35;
 }
 
-/* hint box */
-.request-hint {
-  border-radius: 14px !important;
-}
+.request-hint { border-radius: 14px !important; }
 
 /* -------------------------
-   MULTI ITEM UI (kemas & align)
+   MULTI ITEM UI (kemas + fix X)
 ------------------------- */
 .multi-items-wrap {
   border: 1px solid rgba(0,0,0,0.10);
@@ -357,12 +326,14 @@ label.form-label {
   margin: 0 0 12px;
 }
 
-/* ✅ row kemas: Jenis (besar) + Berat (tetap lebar) + X (kecil) */
 .multi-item-row {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(220px, 260px) 46px;
   gap: 12px;
-  align-items: end;                 /* align input sama garis bawah */
+
+  /* ✅ align baseline kemas */
+  align-items: start;
+
   padding: 14px;
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,0.08);
@@ -370,12 +341,8 @@ label.form-label {
   margin-bottom: 12px;
 }
 
-/* kalau dalam row ada container kecil */
-.multi-item-row > div {
-  min-width: 0; /* penting supaya select tak overflow */
-}
+.multi-item-row > div { min-width: 0; }
 
-/* label dalam row jadi kemas */
 .multi-item-row label,
 .multi-item-row .form-label {
   display: block;
@@ -384,36 +351,47 @@ label.form-label {
   color: #111;
 }
 
-/* input/select full width, tak semput */
 .material-item,
 .weight-item {
   width: 100% !important;
 }
 
-/* input berat bagi rasa “lebih lebar” & senang baca */
-.weight-item {
-  min-width: 220px;
-}
-
-/* button X kecil & center */
+/* ✅ X button align dengan bawah input (bukan tengah-tengah) */
 .multi-item-row .btn-icon,
 .multi-item-row .remove-item-btn {
   width: 46px;
   height: 46px;
   border-radius: 12px;
+
+  display: grid;
+  place-items: center;
+
+  /* kunci position dalam grid */
+  align-self: end;
+  margin-bottom: 2px;
 }
 
-/* responsive: bila mobile, turun bawah jadi 1 column */
+.multi-item-row .btn-icon i,
+.multi-item-row .btn-icon svg,
+.multi-item-row .remove-item-btn i,
+.multi-item-row .remove-item-btn svg {
+  display: block;
+}
+
 @media (max-width: 992px) {
   .multi-item-row {
     grid-template-columns: 1fr;
     align-items: stretch;
   }
-  .weight-item {
-    min-width: 0;
+
+  .multi-item-row .btn-icon,
+  .multi-item-row .remove-item-btn {
+    width: 100%;
+    height: 44px;
+    align-self: stretch;
+    margin-bottom: 0;
   }
 }
-
 
 /* -------------------------
    LEAFLET MAP
@@ -426,7 +404,6 @@ label.form-label {
   overflow: hidden;
 }
 
-/* rider map di calculate page */
 #riderMap {
   width: 100%;
   height: 260px;
@@ -438,13 +415,8 @@ label.form-label {
 /* -------------------------
    CALCULATE / ORDER PAGE
 ------------------------- */
-#calcContainer .card {
-  background: rgba(255,255,255,0.92);
-}
-
-#receiptCard .card-title {
-  font-weight: 900;
-}
+#calcContainer .card { background: rgba(255,255,255,0.92); }
+#receiptCard .card-title { font-weight: 900; }
 
 textarea.form-control[readonly] {
   background: rgba(255,255,255,0.95) !important;
@@ -468,44 +440,6 @@ a:hover { color: #167047; }
 }
 
 /* -------------------------
-   OPTIONAL: hide horizontal scroll from leaflet tiles
+   OPTIONAL: leaflet typography
 ------------------------- */
-.leaflet-container {
-  font: inherit;
-}
-
-/* ==============================
-   FIX: butang X (remove row) kemas & align
-============================== */
-
-/* Pastikan column 3 (X) align betul */
-.multi-item-row {
-  align-items: center !important;  /* override yang end */
-}
-
-/* Kalau X guna class btn-icon (yang kau ada) */
-.multi-item-row .btn-icon {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  margin-top: 24px; /* bagi align dengan input bawah label */
-}
-
-/* Kalau button X tu sebenarnya ada class lain (remove-item-btn) */
-.multi-item-row .remove-item-btn {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  margin-top: 26px;
-}
-
-/* Icon X dalam button supaya center */
-.multi-item-row .btn-icon i,
-.multi-item-row .btn-icon svg,
-.multi-item-row .remove-item-btn i,
-.multi-item-row .remove-item-btn svg {
-  display: block;
-}
-
+.leaflet-container { font: inherit; }
