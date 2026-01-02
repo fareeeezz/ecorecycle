@@ -577,7 +577,9 @@ function handleRequestSubmit(event) {
 
  pushOrderToRiderQueue(request);   // ✅ tambah ni
 saveRequest(request);
+saveOrderForRider(request);   // ⬅️ TAMBAH INI
 window.location.href = "calculate.html";
+
 return false;
 
 }
