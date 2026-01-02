@@ -981,15 +981,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // REQUEST PAGE
-  if (isRequestPage && requestForm) {
-    const welcomeText = document.getElementById("welcomeText");
-    if (welcomeText && user) {
-      const displayName = getDisplayName(user);
-      welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
-    }
-    initMapPicker();
-    requestForm.addEventListener("submit", handleRequestSubmit);
+if (isRequestPage && requestForm) {
+  const welcomeText = document.getElementById("welcomeText");
+  if (welcomeText && user) {
+    const displayName = getDisplayName(user);
+    welcomeText.textContent = `Hai, ${displayName}. Sila isi maklumat pickup.`;
   }
+
+  initMapPicker();   // ⬅️ WAJIB ADA
+  requestForm.addEventListener("submit", handleRequestSubmit);
+}
+
 
   // RESIT PAGE
   if (isResitPage && calcContainer) {
