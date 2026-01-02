@@ -30,8 +30,6 @@ body {
 
 /* -------------------------
    VIDEO BACKGROUND (FULL PAGE)
-   Pastikan setiap page ada:
-   <video autoplay muted loop playsinline id="bgVideo">...
 ------------------------- */
 #bgVideo {
   position: fixed;
@@ -154,20 +152,6 @@ body {
   background: rgba(31,138,90,0.10) !important;
 }
 
-/* Small icon button (remove item row) */
-.btn-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #fff;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: transform .12s ease, filter .12s ease;
-}
-.btn-icon:hover { transform: translateY(-1px); filter: brightness(0.98); }
-
 /* -------------------------
    FORMS / INPUTS
 ------------------------- */
@@ -185,11 +169,6 @@ body {
 label.form-label {
   font-weight: 700;
 }
-
-/* -------------------------
-   PAGE LAYOUT HELPERS
-------------------------- */
-.container { width: 100%; }
 
 /* card base */
 .card {
@@ -235,14 +214,43 @@ label.form-label {
   margin: 0 0 18px;
 }
 
+/* =========================
+   ROLE SWITCH (Customer/Rider)
+========================= */
+.role-switch{
+  display: inline-flex;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.85);
+  margin: 0 auto 14px;
+}
+
+.role-pill{
+  display: inline-block;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-weight: 900;
+  color: #1f8a5a;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.role-pill:hover{
+  background: rgba(31,138,90,0.08);
+}
+
+.role-pill.active{
+  background: #1f8a5a;
+  color: #fff;
+}
+
 /* -------------------------
-   REQUEST PAGE
+   REQUEST PAGE (biar ada untuk page lain)
 ------------------------- */
 .request-main { max-width: 1200px; }
 
-.request-hero { margin-top: 6px; }
-
-.request-title {
+.request-title{
   font-size: 2.2rem;
   font-weight: 900;
   margin-bottom: 6px;
@@ -251,7 +259,7 @@ label.form-label {
   text-shadow: none !important;
 }
 
-.request-subtitle {
+.request-subtitle{
   color: #000 !important;
   opacity: 1 !important;
   font-weight: 500;
@@ -259,81 +267,12 @@ label.form-label {
   margin: 0 auto;
 }
 
-.request-card {
-  overflow: hidden;
-  background: rgba(255,255,255,0.92);
-  border-radius: 22px !important;
-}
-
-.request-card-left { background: rgba(245, 251, 248, 0.92); }
-
-.request-steps { padding-left: 18px; margin: 0; }
-.request-steps li { margin-bottom: 8px; }
-
-.request-rate-box {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
-  padding: 14px;
-}
-
-.request-rate-label {
-  font-weight: 900;
-  color: #1f8a5a;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-  font-size: 0.84rem;
-}
-
-.request-rate-value { font-weight: 800; margin-bottom: 8px; }
-
-.request-rate-points {
-  color: rgba(0,0,0,0.70);
-  font-size: 0.92rem;
-  line-height: 1.35;
-}
-
-.request-hint { border-radius: 14px !important; }
-
-/* -------------------------
-   MULTI ITEM UI (kemas + fix X)
-------------------------- */
-.multi-items-wrap {
-  border: 1px solid rgba(0,0,0,0.10);
-  border-radius: 16px;
-  padding: 16px;
-  background: rgba(255,255,255,0.86);
-}
-
-.multi-items-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.multi-items-title {
-  font-weight: 900;
-  font-size: 1.05rem;
-  margin: 0;
-}
-
-.multi-items-note {
-  color: rgba(0,0,0,0.55);
-  font-size: 0.92rem;
-  margin: 0 0 12px;
-}
-
-.multi-item-row {
+/* Multi item UI kemas */
+.multi-item-row{
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(220px, 260px) 46px;
   gap: 12px;
-
-  /* ✅ align baseline kemas */
-  align-items: start;
-
+  align-items: center;
   padding: 14px;
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,0.08);
@@ -344,7 +283,7 @@ label.form-label {
 .multi-item-row > div { min-width: 0; }
 
 .multi-item-row label,
-.multi-item-row .form-label {
+.multi-item-row .form-label{
   display: block;
   font-weight: 800;
   margin: 0 0 6px;
@@ -352,74 +291,32 @@ label.form-label {
 }
 
 .material-item,
-.weight-item {
-  width: 100% !important;
-}
+.weight-item{ width: 100% !important; }
 
-/* ✅ X button align dengan bawah input (bukan tengah-tengah) */
-.multi-item-row .btn-icon,
-.multi-item-row .remove-item-btn {
+.multi-item-row .removeItemBtn,
+.multi-item-row .btn-icon{
   width: 46px;
   height: 46px;
-  border-radius: 12px;
-
   display: grid;
   place-items: center;
-
-  /* kunci position dalam grid */
-  align-self: end;
-  margin-bottom: 2px;
+  border-radius: 12px;
 }
 
-.multi-item-row .btn-icon i,
-.multi-item-row .btn-icon svg,
-.multi-item-row .remove-item-btn i,
-.multi-item-row .remove-item-btn svg {
-  display: block;
+/* align X supaya tak lari */
+.multi-item-row .removeItemBtn{
+  margin-top: 22px;
 }
 
-@media (max-width: 992px) {
-  .multi-item-row {
+@media (max-width: 992px){
+  .multi-item-row{
     grid-template-columns: 1fr;
     align-items: stretch;
   }
-
-  .multi-item-row .btn-icon,
-  .multi-item-row .remove-item-btn {
+  .multi-item-row .removeItemBtn{
+    margin-top: 0;
     width: 100%;
     height: 44px;
-    align-self: stretch;
-    margin-bottom: 0;
   }
-}
-
-/* -------------------------
-   LEAFLET MAP
-------------------------- */
-#map {
-  width: 100%;
-  height: 300px;
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.12);
-  overflow: hidden;
-}
-
-#riderMap {
-  width: 100%;
-  height: 260px;
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.12);
-  overflow: hidden;
-}
-
-/* -------------------------
-   CALCULATE / ORDER PAGE
-------------------------- */
-#calcContainer .card { background: rgba(255,255,255,0.92); }
-#receiptCard .card-title { font-weight: 900; }
-
-textarea.form-control[readonly] {
-  background: rgba(255,255,255,0.95) !important;
 }
 
 /* -------------------------
@@ -434,60 +331,6 @@ a:hover { color: #167047; }
 @media (max-width: 768px) {
   .request-title { font-size: 1.8rem; }
   .request-subtitle { font-size: 0.98rem; }
-
   .auth-title { font-size: 1.7rem; }
   .auth-card { padding: 20px; }
 }
-
-/* -------------------------
-   OPTIONAL: leaflet typography
-------------------------- */
-.leaflet-container { font: inherit; }
-
-
-/* ==============================
-   FIX TERUS: Butang X (remove row) kemas & sama tinggi input
-   (PASTE PALING BAWAH style.css)
-============================== */
-
-/* Pastikan row align ikut bawah input */
-.multi-item-row{
-  align-items: end !important;
-}
-
-/* Target butang remove walau apa class dia */
-.multi-item-row .btn-icon,
-.multi-item-row .remove-item-btn,
-.multi-item-row button[type="button"]{
-  width: 46px !important;
-  height: 46px !important;
-  padding: 0 !important;
-
-  display: grid !important;
-  place-items: center !important;
-
-  border-radius: 12px !important;
-  border: 1px solid rgba(0,0,0,0.15) !important;
-  background: #fff !important;
-
-  /* align betul-betul sebaris input */
-  align-self: end !important;
-  margin: 0 0 2px 0 !important;
-}
-
-/* Bagi simbol X jadi cantik & center */
-.multi-item-row .btn-icon,
-.multi-item-row .remove-item-btn,
-.multi-item-row button[type="button"]{
-  font-size: 22px !important;
-  line-height: 1 !important;
-}
-
-/* Hover kemas */
-.multi-item-row .btn-icon:hover,
-.multi-item-row .remove-item-btn:hover,
-.multi-item-row button[type="button"]:hover{
-  filter: brightness(0.98);
-  transform: translateY(-1px);
-}
-
