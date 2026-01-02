@@ -53,7 +53,7 @@
         </p>
       </div>
 
-      <!-- ✅ IMPORTANT: jangan letak onsubmit="" supaya app.js boleh attach listener -->
+      <!-- IMPORTANT: jangan letak onsubmit="" supaya app.js attach listener -->
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label" for="username">Username</label>
@@ -73,6 +73,18 @@
         <button type="submit" class="btn btn-eco-primary w-100">
           Log Masuk
         </button>
+
+        <!-- ✅ Forgot password link -->
+        <div class="mt-2 text-center">
+          <button
+            type="button"
+            class="btn btn-link p-0 small"
+            data-bs-toggle="modal"
+            data-bs-target="#forgotModal"
+          >
+            Lupa kata laluan?
+          </button>
+        </div>
       </form>
 
       <div class="mt-3 text-center">
@@ -86,6 +98,60 @@
 
     </div>
   </main>
+
+  <!-- ✅ MODAL: Forgot Password -->
+  <div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:16px;">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Lupa Kata Laluan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="small text-muted mb-3">
+            Masukkan <strong>Username</strong> dan <strong>No Telefon</strong> yang sama semasa Sign Up.
+            Kemudian set kata laluan baru.
+          </p>
+
+          <form id="forgotForm">
+            <div class="mb-3">
+              <label class="form-label" for="forgotUsername">Username</label>
+              <input type="text" class="form-control" id="forgotUsername" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="forgotPhone">Nombor Telefon (WhatsApp)</label>
+              <input type="text" class="form-control" id="forgotPhone" placeholder="contoh: 60123456789" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="forgotNewPassword">Kata Laluan Baru</label>
+              <input type="password" class="form-control" id="forgotNewPassword" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="forgotConfirmPassword">Confirm Kata Laluan</label>
+              <input type="password" class="form-control" id="forgotConfirmPassword" required>
+            </div>
+
+            <button type="submit" class="btn btn-eco-primary w-100">
+              Reset Kata Laluan
+            </button>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="small text-muted">
+            Demo sahaja: reset dibuat dalam <code>localStorage</code>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (wajib untuk modal) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="app.js"></script>
 </body>
