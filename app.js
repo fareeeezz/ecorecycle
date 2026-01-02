@@ -1,87 +1,77 @@
-// ===== USERS =====
-function getUsers() {
+// ===== USER STORAGE =====
+function users() {
   return JSON.parse(localStorage.getItem("eco_users") || "[]");
 }
-function saveUser(u) {
-  const users = getUsers();
-  users.push(u);
-  localStorage.setItem("eco_users", JSON.stringify(users));
-}
-function findUser(u, p, pw) {
-  return getUsers().find(x =>
-    x.username === u && x.phone === p && x.password === pw
-  );
+
+function saveUsers(u) {
+  localStorage.setItem("eco_users", JSON.stringify(u));
 }
 
-// ===== SESSION =====
-function setLoggedIn(user) {
-  sessionStorage.setItem("eco_user", JSON.stringify(user));
-}
-function getUser() {
-  return JSON.parse(sessionStorage.getItem("eco_user"));
-}
-function handleLogout() {
-  sessionStorage.clear();
-  window.location.href = "index.html";
-}
+// ===== LOGIN =====
+document.getElementById("loginCustomer")?.onclick = () => {
+  document.getElementById("loginRole").value = "customer";
+};
+
+document.getElementById("loginRider")?.onclick = () => {
+  document.getElementById("loginRole").value = "rider";
+};
+
+document.getElementById("loginForm")?.addEventListener("submit", e => {
+  e.preventDefault();
+
+  const role = loginRole.value;
+  sessionStorage.setItem("role", role);
+  sessionStorage.setItem("login", "1");
+
+  if (role === "rider") location.href = "rider.html";
+  else location.href = "request.html";
+});
 
 // ===== SIGNUP =====
 document.getElementById("signupForm")?.addEventListener("submit", e => {
   e.preventDefault();
-  saveUser({
+  const u = users();
+  u.push({
     username: signupUsername.value,
     phone: signupPhone.value,
     password: signupPassword.value
   });
-  alert("Signup berjaya");
+  saveUsers(u);
+  alert("Daftar berjaya");
   location.href = "index.html";
 });
 
-// ===== LOGIN =====
-document.getElementById("loginForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-  const role = loginRole.value;
-  const u = findUser(username.value, phone.value, password.value);
-  if (!u) return alert("Login gagal");
-
-  setLoggedIn(u);
-  location.href = role === "rider" ? "rider.html" : "request.html";
-});
-
 // ===== MAP =====
-function initMapPicker() {
-  if (!map) return;
-  const m = L.map("map").setView([3.14, 101.69], 13);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(m);
-  let marker;
-  m.on("click", e => {
-    if (marker) marker.setLatLng(e.latlng);
-    else marker = L.marker(e.latlng).addTo(m);
+if (document.getElementById("map")) {
+  const map = L.map("map").setView([3.14, 101.68], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+  map.on("click", e => {
     locationLat.value = e.latlng.lat;
     locationLng.value = e.latlng.lng;
-    locationDisplay.value = `${e.latlng.lat}, ${e.latlng.lng}`;
+    L.marker(e.latlng).addTo(map);
   });
 }
-initMapPicker();
 
 // ===== REQUEST =====
 document.getElementById("requestForm")?.addEventListener("submit", e => {
   e.preventDefault();
-  const order = {
-    id: Date.now(),
-    user: getUser(),
-    items: [{
-      material: document.querySelector(".material-item").value,
-      weightKg: document.querySelector(".weight-item").value
-    }],
-    location: {
-      lat: locationLat.value,
-      lng: locationLng.value
-    },
-    status: "Pending"
-  };
   const orders = JSON.parse(localStorage.getItem("eco_orders") || "[]");
-  orders.push(order);
+
+  orders.push({
+    id: Date.now(),
+    material: document.querySelector(".material-item").value,
+    weight: document.querySelector(".weight-item").value,
+    lat: locationLat.value,
+    lng: locationLng.value,
+    status: "Pending"
+  });
+
   localStorage.setItem("eco_orders", JSON.stringify(orders));
   location.href = "calculate.html";
 });
+
+function logout() {
+  sessionStorage.clear();
+  location.href = "index.html";
+}
