@@ -1,77 +1,69 @@
-// ===== USER STORAGE =====
-function users() {
-  return JSON.parse(localStorage.getItem("eco_users") || "[]");
+// ===============================
+// LOGIN
+// ===============================
+function handleLogin() {
+  const role = document.getElementById("loginRole").value;
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!username || !password) {
+    alert("Sila isi username dan kata laluan.");
+    return;
+  }
+
+  // Rider login (simple demo)
+  if (role === "rider") {
+    if (username === "rider" && password === "rider123") {
+      sessionStorage.setItem("eco_role", "rider");
+      window.location.href = "rider.html";
+      return;
+    } else {
+      alert("Akaun rider tidak sah.");
+      return;
+    }
+  }
+
+  // Customer login (guna localStorage)
+  const users = JSON.parse(localStorage.getItem("eco_users")) || [];
+  const user = users.find(
+    u => u.username === username && u.password === password
+  );
+
+  if (!user) {
+    alert("Username atau kata laluan salah.");
+    return;
+  }
+
+  sessionStorage.setItem("eco_role", "customer");
+  sessionStorage.setItem("eco_user", JSON.stringify(user));
+  window.location.href = "request.html";
 }
 
-function saveUsers(u) {
-  localStorage.setItem("eco_users", JSON.stringify(u));
+// ===============================
+// FORGOT PASSWORD (DEMO)
+// ===============================
+function forgotPassword() {
+  const username = prompt("Masukkan username anda:");
+
+  if (!username) return;
+
+  const users = JSON.parse(localStorage.getItem("eco_users")) || [];
+  const user = users.find(u => u.username === username);
+
+  if (!user) {
+    alert("Akaun tidak dijumpai.");
+    return;
+  }
+
+  alert(
+    `DEMO SAHAJA\n\nKata laluan anda ialah:\n${user.password}\n\n(Sistem sebenar guna OTP / email)`
+  );
 }
 
-// ===== LOGIN =====
-document.getElementById("loginCustomer")?.onclick = () => {
-  document.getElementById("loginRole").value = "customer";
-};
-
-document.getElementById("loginRider")?.onclick = () => {
-  document.getElementById("loginRole").value = "rider";
-};
-
-document.getElementById("loginForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-
-  const role = loginRole.value;
-  sessionStorage.setItem("role", role);
-  sessionStorage.setItem("login", "1");
-
-  if (role === "rider") location.href = "rider.html";
-  else location.href = "request.html";
-});
-
-// ===== SIGNUP =====
-document.getElementById("signupForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-  const u = users();
-  u.push({
-    username: signupUsername.value,
-    phone: signupPhone.value,
-    password: signupPassword.value
-  });
-  saveUsers(u);
-  alert("Daftar berjaya");
-  location.href = "index.html";
-});
-
-// ===== MAP =====
-if (document.getElementById("map")) {
-  const map = L.map("map").setView([3.14, 101.68], 12);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-
-  map.on("click", e => {
-    locationLat.value = e.latlng.lat;
-    locationLng.value = e.latlng.lng;
-    L.marker(e.latlng).addTo(map);
-  });
-}
-
-// ===== REQUEST =====
-document.getElementById("requestForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-  const orders = JSON.parse(localStorage.getItem("eco_orders") || "[]");
-
-  orders.push({
-    id: Date.now(),
-    material: document.querySelector(".material-item").value,
-    weight: document.querySelector(".weight-item").value,
-    lat: locationLat.value,
-    lng: locationLng.value,
-    status: "Pending"
-  });
-
-  localStorage.setItem("eco_orders", JSON.stringify(orders));
-  location.href = "calculate.html";
-});
-
+// ===============================
+// LOGOUT (DIGUNAKAN DI CUSTOMER & RIDER)
+// ===============================
 function logout() {
   sessionStorage.clear();
-  location.href = "index.html";
+  window.location.href = "index.html";
 }
