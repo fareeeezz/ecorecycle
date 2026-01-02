@@ -1,32 +1,158 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <title>EcoRecycle | Login</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoRecycle – Log Masuk</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-<div class="card">
-  <h2>EcoRecycle</h2>
-  <p>Log masuk sebagai</p>
+<body class="app-body">
 
-  <select id="role">
-    <option value="customer">Customer</option>
-    <option value="rider">Rider</option>
-  </select>
+  <!-- VIDEO BACKGROUND -->
+  <video autoplay muted loop playsinline id="bgVideo">
+    <source src="eco-bg.mp4" type="video/mp4">
+  </video>
 
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Kata Laluan">
+  <!-- HEADER -->
+  <header class="eco-header">
+    <div class="container d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="eco-logo-circle">♻️</div>
+        <div>
+          <div class="eco-title">EcoRecycle</div>
+          <div class="eco-subtitle">Pickup Kitar Semula Komuniti</div>
+        </div>
+      </div>
 
-  <button onclick="login()">Log Masuk</button>
+      <nav class="eco-nav d-none d-md-flex gap-2">
+        <a href="index.html" class="eco-nav-link eco-nav-link-active">Login</a>
+        <a href="signup.html" class="eco-nav-link">Sign Up</a>
+      </nav>
+    </div>
+  </header>
 
-  <p>
-    <a href="signup.html">Daftar Akaun</a> |
-    <a href="forgot.html">Lupa Kata Laluan?</a>
-  </p>
-</div>
+  <!-- MAIN -->
+  <main class="auth-main">
+    <div class="auth-card">
 
-<script src="app.js"></script>
+      <div class="text-center mb-3">
+        <div class="d-inline-flex align-items-center gap-2 mb-2">
+          <div class="eco-logo-circle">♻️</div>
+          <div class="text-start">
+            <div class="fw-bold" style="font-size:1.05rem;">EcoRecycle</div>
+            <div style="color:rgba(0,0,0,0.65); font-size:0.9rem;">Pickup Kitar Semula Komuniti</div>
+          </div>
+        </div>
+
+        <h1 class="auth-title">Log Masuk</h1>
+        <p class="auth-subtitle">
+          Masukkan maklumat anda untuk terus buat request pickup.
+        </p>
+      </div>
+
+      <!-- IMPORTANT: jangan letak onsubmit="" supaya app.js attach listener -->
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label" for="username">Username</label>
+          <input type="text" class="form-control" id="username" placeholder="contoh: kimi" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="phone">Nombor Telefon (WhatsApp)</label>
+          <input type="text" class="form-control" id="phone" placeholder="contoh: 60123456789" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="password">Kata Laluan</label>
+          <input type="password" class="form-control" id="password" placeholder="••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-eco-primary w-100">
+          Log Masuk
+        </button>
+
+        <!-- ✅ Forgot password link -->
+        <div class="mt-2 text-center">
+          <button
+            type="button"
+            class="btn btn-link p-0 small"
+            data-bs-toggle="modal"
+            data-bs-target="#forgotModal"
+          >
+            Lupa kata laluan?
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-3 text-center">
+        <div class="small">
+          Belum ada akaun? <a href="signup.html" class="fw-bold">Daftar Akaun</a>
+        </div>
+        <div class="small text-muted mt-1">
+          Maklumat login hanya digunakan untuk sesi demo sistem EcoRecycle.
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ✅ MODAL: Forgot Password -->
+  <div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:16px;">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">Lupa Kata Laluan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="small text-muted mb-3">
+            Masukkan <strong>Username</strong> dan <strong>No Telefon</strong> yang sama semasa Sign Up.
+            Kemudian set kata laluan baru.
+          </p>
+
+          <form id="forgotForm">
+            <div class="mb-3">
+              <label class="form-label" for="forgotUsername">Username</label>
+              <input type="text" class="form-control" id="forgotUsername" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="forgotPhone">Nombor Telefon (WhatsApp)</label>
+              <input type="text" class="form-control" id="forgotPhone" placeholder="contoh: 60123456789" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="forgotNewPassword">Kata Laluan Baru</label>
+              <input type="password" class="form-control" id="forgotNewPassword" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="forgotConfirmPassword">Confirm Kata Laluan</label>
+              <input type="password" class="form-control" id="forgotConfirmPassword" required>
+            </div>
+
+            <button type="submit" class="btn btn-eco-primary w-100">
+              Reset Kata Laluan
+            </button>
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <div class="small text-muted">
+            Demo sahaja: reset dibuat dalam <code>localStorage</code>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (wajib untuk modal) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="app.js"></script>
 </body>
 </html>
