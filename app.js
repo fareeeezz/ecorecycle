@@ -6,30 +6,12 @@ const POINTS_PER_KG = 10;      // fallback points per kg
 
 // KADAR MENGIKUT MATERIAL
 const MATERIAL_RATES = {
-  "Plastik": {
-    rate: 0.30,
-    pointsPerKg: 10
-  },
-  "Kertas": {
-    rate: 0.20,
-    pointsPerKg: 8
-  },
-  "Tin": {
-    rate: 0.80,
-    pointsPerKg: 15
-  },
-  "Kaca": {
-    rate: 0.10,
-    pointsPerKg: 5
-  },
-  "Elektronik": {
-    rate: 1.50,
-    pointsPerKg: 20
-  },
-  "Minyak Masak Terpakai": {
-    rate: 2.00,
-    pointsPerKg: 25
-  }
+  "Plastik": { rate: 0.30, pointsPerKg: 10 },
+  "Kertas": { rate: 0.20, pointsPerKg: 8 },
+  "Tin": { rate: 0.80, pointsPerKg: 15 },
+  "Kaca": { rate: 0.10, pointsPerKg: 5 },
+  "Elektronik": { rate: 1.50, pointsPerKg: 20 },
+  "Minyak Masak Terpakai": { rate: 2.00, pointsPerKg: 25 }
 };
 
 function calculateMultipleItems(items) {
@@ -48,15 +30,20 @@ function calculateMultipleItems(items) {
   return { breakdown, totalRM, totalPoints };
 }
 
-
 // Nombor WhatsApp owner EcoRecycle (60 + nombor, tanpa + dan tanpa 0 depan)
 const ADMIN_WA_NUMBER = "601111473069"; // tukar kalau perlu
 
+// Helper normalize
+function normalizePhone(phone) {
+  return (phone || "").replace(/\D/g, "");
+}
+function normalizeUsername(username) {
+  return (username || "").trim().toLowerCase();
+}
 
 // ====================================
 //  KELAS OOP
 // ====================================
-
 class User {
   constructor(username, phone, password) {
     this.username = username;
@@ -94,11 +81,9 @@ class IncentiveCalculator {
   }
 }
 
-
 // ====================================
 //  REGISTERED USERS (localStorage)
 // ====================================
-
 function getRegisteredUsers() {
   try {
     const data = localStorage.getItem("eco_users");
@@ -120,22 +105,100 @@ function addRegisteredUser(user) {
 
 function findUserByCredentials(username, phone, password) {
   const users = getRegisteredUsers();
-  const unameNorm = (username || "").trim().toLowerCase();
-  const phoneNorm = (phone || "").replace(/\D/g, "");
+  const unameNorm = normalizeUsername(username);
+  const phoneNorm = normalizePhone(phone);
+
   return (
     users.find(u =>
-      (u.username || "").trim().toLowerCase() === unameNorm &&
-      (u.phone || "").replace(/\D/g, "") === phoneNorm &&
+      normalizeUsername(u.username) === unameNorm &&
+      normalizePhone(u.phone) === phoneNorm &&
       u.password === password
     ) || null
   );
 }
 
+// ====================================
+//  ✅ FORGOT PASSWORD (BARU)
+// ====================================
+function updateUserPassword(username, phone, newPassword) {
+  const users = getRegisteredUsers();
+  const unameNorm = normalizeUsername(username);
+  const phoneNorm = normalizePhone(phone);
+
+  const idx = users.findIndex(u =>
+    normalizeUsername(u.username) === unameNorm &&
+    normalizePhone(u.phone) === phoneNorm
+  );
+
+  if (idx === -1) return false;
+
+  users[idx].password = newPassword;
+  saveRegisteredUsers(users);
+  return true;
+}
+
+function handleForgotPassword(event) {
+  event.preventDefault();
+
+  const uEl = document.getElementById("forgotUsername");
+  const pEl = document.getElementById("forgotPhone");
+  const nEl = document.getElementById("forgotNewPassword");
+  const cEl = document.getElementById("forgotConfirmPassword");
+
+  if (!uEl || !pEl || !nEl || !cEl) {
+    alert("Ralat: borang forgot password tidak lengkap. Semak index.html (id input).");
+    return false;
+  }
+
+  const username = uEl.value.trim();
+  const phone = pEl.value.trim();
+  const newPass = nEl.value.trim();
+  const confirm = cEl.value.trim();
+
+  if (!username || !phone || !newPass || !confirm) {
+    alert("Sila isi semua ruangan forgot password.");
+    return false;
+  }
+
+  if (newPass.length < 4) {
+    alert("Kata laluan terlalu pendek. Min 4 aksara.");
+    return false;
+  }
+
+  if (newPass !== confirm) {
+    alert("Confirm password tidak sama.");
+    return false;
+  }
+
+  const ok = updateUserPassword(username, phone, newPass);
+  if (!ok) {
+    alert("Akaun tidak dijumpai. Pastikan Username & No Telefon sama seperti masa Sign Up.");
+    return false;
+  }
+
+  alert("Reset berjaya! Sila log masuk guna kata laluan baru.");
+
+  // clear input
+  uEl.value = "";
+  pEl.value = "";
+  nEl.value = "";
+  cEl.value = "";
+
+  // tutup modal jika bootstrap ada
+  try {
+    const modalEl = document.getElementById("forgotModal");
+    if (modalEl && window.bootstrap) {
+      const inst = window.bootstrap.Modal.getInstance(modalEl) || new window.bootstrap.Modal(modalEl);
+      inst.hide();
+    }
+  } catch (e) {}
+
+  return false;
+}
 
 // ====================================
 //  SESSION LOGIN (sessionStorage)
 // ====================================
-
 function setLoggedIn(user) {
   sessionStorage.setItem("eco_logged_in", "1");
   sessionStorage.setItem("eco_user", JSON.stringify(user));
@@ -176,11 +239,9 @@ function getDisplayName(user) {
   return user.username || user.name || user.email || "pengguna";
 }
 
-
 // ====================================
 //  NAVBAR AUTO HIDE/SHOW + LOGOUT
 // ====================================
-
 function handleLogout(event) {
   if (event) event.preventDefault();
   clearLoginSession();
@@ -207,7 +268,6 @@ function updateEcoNavbar() {
     let logoutLink = nav.querySelector('a[data-eco="logout"]');
 
     if (loggedIn) {
-      // ✅ Logged in: show Request + Order + Logout
       if (loginLink)  loginLink.style.display = "none";
       if (signupLink) signupLink.style.display = "none";
 
@@ -227,15 +287,11 @@ function updateEcoNavbar() {
       }
 
     } else {
-      // ✅ Not logged in: hide Request + Order, remove Logout
       if (logoutLink) logoutLink.remove();
 
       if (requestLink) requestLink.style.display = "none";
       if (orderLink)   orderLink.style.display = "none";
 
-      // 🔥 Rules ikut permintaan:
-      // index.html -> tinggal Sign Up sahaja
-      // signup.html -> tinggal Login sahaja
       if (isIndexPage) {
         if (loginLink)  loginLink.style.display = "none";
         if (signupLink) signupLink.style.display = "";
@@ -250,11 +306,9 @@ function updateEcoNavbar() {
   });
 }
 
-
 // ====================================
 //  HANDLER: SIGN UP
 // ====================================
-
 function handleSignup(event) {
   event.preventDefault();
 
@@ -276,13 +330,13 @@ function handleSignup(event) {
     return false;
   }
 
-  const unameNorm = username.toLowerCase();
-  const phoneNorm = phone.replace(/\D/g, "");
+  const unameNorm = normalizeUsername(username);
+  const phoneNorm = normalizePhone(phone);
 
   const users = getRegisteredUsers();
   const duplicate = users.find(u =>
-    (u.username || "").trim().toLowerCase() === unameNorm ||
-    (u.phone || "").replace(/\D/g, "") === phoneNorm
+    normalizeUsername(u.username) === unameNorm ||
+    normalizePhone(u.phone) === phoneNorm
   );
 
   if (duplicate) {
@@ -298,11 +352,9 @@ function handleSignup(event) {
   return false;
 }
 
-
 // ====================================
 //  HANDLER: LOGIN
 // ====================================
-
 function handleLogin(event) {
   if (event) event.preventDefault();
 
@@ -335,11 +387,9 @@ function handleLogin(event) {
   return false;
 }
 
-
 // ====================================
 //  MAP PICKER (Leaflet) – PIN LOKASI
 // ====================================
-
 function initMapPicker() {
   const mapDiv    = document.getElementById("map");
   const display   = document.getElementById("locationDisplay");
@@ -367,11 +417,8 @@ function initMapPicker() {
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
 
-    if (marker) {
-      marker.setLatLng(e.latlng);
-    } else {
-      marker = L.marker(e.latlng).addTo(map);
-    }
+    if (marker) marker.setLatLng(e.latlng);
+    else marker = L.marker(e.latlng).addTo(map);
 
     latInput.value = lat;
     lngInput.value = lng;
@@ -379,11 +426,9 @@ function initMapPicker() {
   });
 }
 
-
 // ====================================
 //  HANDLER: REQUEST PICKUP
 // ====================================
-
 function handleRequestSubmit(event) {
   if (event) event.preventDefault();
 
@@ -400,10 +445,7 @@ function handleRequestSubmit(event) {
     return false;
   }
 
-  // ===============================
-  // MULTIPLE ITEMS (BARU)
-  // Cari semua row yang awak buat bila tekan "Tambah Jenis Barang"
-  // ===============================
+  // MULTIPLE ITEMS
   const itemRows = document.querySelectorAll(".multi-item-row");
   const items = [];
 
@@ -416,9 +458,7 @@ function handleRequestSubmit(event) {
     });
   }
 
-  // ===============================
-  // FALLBACK (LAMA) - kalau page masih pakai id material/weight
-  // ===============================
+  // FALLBACK (LAMA)
   let material = null;
   let weight = null;
 
@@ -443,13 +483,11 @@ function handleRequestSubmit(event) {
       return false;
     }
   } else {
-    // Validasi: maksimum 5 item
     if (items.length > 5) {
       alert("Maksimum 5 jenis barang sahaja.");
       return false;
     }
 
-    // Validasi: tak boleh sama jenis berulang
     const set = new Set(items.map(x => x.material));
     if (set.size !== items.length) {
       alert("Sila pilih jenis barang yang lain (tidak boleh sama).");
@@ -457,9 +495,7 @@ function handleRequestSubmit(event) {
     }
   }
 
-  // ===============================
   // Build request object
-  // ===============================
   let request;
   if (items.length > 0) {
     request = new PickupRequest(user, null, null);
@@ -468,11 +504,9 @@ function handleRequestSubmit(event) {
     request = new PickupRequest(user, material, weight);
   }
 
-  // ===============================
   // Lokasi (kekal)
-  // ===============================
-  const latInput   = document.getElementById("locationLat");
-  const lngInput   = document.getElementById("locationLng");
+  const latInput = document.getElementById("locationLat");
+  const lngInput = document.getElementById("locationLng");
 
   let location = null;
   if (latInput && lngInput && latInput.value && lngInput.value) {
@@ -485,44 +519,33 @@ function handleRequestSubmit(event) {
   return false;
 }
 
-
-
 // ====================================
 //  PAPAR RESIT & WHATSAPP
 // ====================================
-
 function displayCalculation() {
   const container = document.getElementById("calcContainer");
   if (!container) return;
 
   if (!isLoggedIn()) {
-    container.innerHTML =
-      '<p class="text-center">Anda perlu log masuk dahulu untuk melihat order.</p>';
+    container.innerHTML = '<p class="text-center">Anda perlu log masuk dahulu untuk melihat order.</p>';
     return;
   }
 
   const reqData = getRequest();
   if (!reqData) {
-    container.innerHTML =
-      '<p class="text-center">Tiada data order dijumpai. Sila buat request semula.</p>';
+    container.innerHTML = '<p class="text-center">Tiada data order dijumpai. Sila buat request semula.</p>';
     return;
   }
 
   const user = reqData.user;
   const displayName = getDisplayName(user);
 
-  // ================================
   // Items: single vs multi
-  // ================================
   let items = [];
-
   if (Array.isArray(reqData.items) && reqData.items.length > 0) {
     items = reqData.items;
   } else {
-    items = [{
-      material: reqData.material,
-      weightKg: reqData.weightKg
-    }];
+    items = [{ material: reqData.material, weightKg: reqData.weightKg }];
   }
 
   // Lokasi
@@ -543,9 +566,7 @@ function displayCalculation() {
     `;
   }
 
-  // ================================
   // Kiraan: per item + total
-  // ================================
   let totalRM = 0;
   let totalPoints = 0;
 
@@ -563,7 +584,6 @@ function displayCalculation() {
     const itemRM = res.totalIncentive;
     const itemPoints = res.points;
     const ratePerKg = res.ratePerKg;
-    const pointsPerKg = res.pointsPerKg;
 
     totalRM += itemRM;
     totalPoints += itemPoints;
@@ -586,9 +606,6 @@ function displayCalculation() {
   const totalRMText = totalRM.toFixed(2);
   const totalPointsText = totalPoints.toFixed(0);
 
-  // ================================
-  // Receipt text (copy/simpan)
-  // ================================
   const receiptText = `
 ORDER PICKUP ECORCYCLE
 
@@ -604,9 +621,6 @@ ${locationLineText}
 Terima kasih kerana menyokong kitar semula.
   `.trim();
 
-  // ================================
-  // WhatsApp message
-  // ================================
   const waMessage = `
 EcoRecycle Pickup Order
 
@@ -622,9 +636,6 @@ ${locationWaLine}
 
   const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
 
-  // ================================
-  // UI HTML (kekal semua feature)
-  // ================================
   container.innerHTML = `
     <div class="row justify-content-center">
       <div class="col-md-10">
@@ -689,9 +700,7 @@ ${locationWaLine}
         </a>
 
         <h4 class="mb-2">Kedudukan Rider (Simulasi)</h4>
-        <p id="riderInfo" class="small text-muted mb-2">
-          Memuatkan peta rider...
-        </p>
+        <p id="riderInfo" class="small text-muted mb-2">Memuatkan peta rider...</p>
         <div id="riderMap" class="mb-4"></div>
 
         <button class="btn btn-outline-secondary w-100 mb-2" onclick="downloadReceiptPdf()">
@@ -705,7 +714,6 @@ ${locationWaLine}
     </div>
   `;
 
-  // 🚚 lepas HTML dah render, baru init peta rider
   const reqForRider = { location: reqData.location || null };
   initRiderMap(reqForRider);
 }
@@ -715,13 +723,11 @@ function initRiderMap(request) {
   const infoP  = document.getElementById("riderInfo");
   if (!mapDiv) return;
 
-  // Kalau Leaflet tak wujud
   if (typeof L === "undefined") {
     if (infoP) infoP.textContent = "Ralat: peta rider tidak dapat dimuatkan.";
     return;
   }
 
-  // Kalau user tak pin lokasi masa Request
   if (!request.location || !request.location.lat || !request.location.lng) {
     if (infoP) {
       infoP.textContent =
@@ -733,7 +739,6 @@ function initRiderMap(request) {
   const custLat = request.location.lat;
   const custLng = request.location.lng;
 
-  // Set view pada lokasi pelanggan
   const map = L.map("riderMap").setView([custLat, custLng], 14);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -741,19 +746,16 @@ function initRiderMap(request) {
     attribution: "© OpenStreetMap contributors"
   }).addTo(map);
 
-  // Marker pelanggan
-  const customerMarker = L.marker([custLat, custLng]).addTo(map)
+  L.marker([custLat, custLng]).addTo(map)
     .bindPopup("Lokasi Pelanggan").openPopup();
 
-  // Rider mula +/- 1km dari pelanggan (simulasi)
   const riderStart = [custLat + 0.01, custLng - 0.01];
   const riderMarker = L.marker(riderStart).addTo(map)
     .bindPopup("Rider EcoRecycle");
 
-  // Animasi rider bergerak ke pelanggan
   let step = 0;
-  const totalSteps = 40;      // lagi besar, lagi perlahan
-  const intervalMs = 500;     // 0.5s setiap langkah
+  const totalSteps = 40;
+  const intervalMs = 500;
 
   if (infoP) {
     infoP.textContent =
@@ -762,7 +764,7 @@ function initRiderMap(request) {
 
   const interval = setInterval(() => {
     step++;
-    const t = step / totalSteps;  // 0 → 1
+    const t = step / totalSteps;
     const lat = riderStart[0] + (custLat - riderStart[0]) * t;
     const lng = riderStart[1] + (custLng - riderStart[1]) * t;
     riderMarker.setLatLng([lat, lng]);
@@ -770,19 +772,14 @@ function initRiderMap(request) {
     if (step >= totalSteps) {
       clearInterval(interval);
       riderMarker.bindPopup("Rider telah tiba!").openPopup();
-      if (infoP) {
-        infoP.textContent = "Rider EcoRecycle telah tiba di lokasi anda. (Simulasi)";
-      }
+      if (infoP) infoP.textContent = "Rider EcoRecycle telah tiba di lokasi anda. (Simulasi)";
     }
   }, intervalMs);
 }
 
-
-
 // ====================================
 //  DOWNLOAD PDF RESIT (A4)
 // ====================================
-
 function downloadReceiptPdf() {
   const reqData = getRequest();
   if (!reqData) {
@@ -797,10 +794,7 @@ function downloadReceiptPdf() {
   if (Array.isArray(reqData.items) && reqData.items.length > 0) {
     items = reqData.items;
   } else {
-    items = [{
-      material: reqData.material,
-      weightKg: reqData.weightKg
-    }];
+    items = [{ material: reqData.material, weightKg: reqData.weightKg }];
   }
 
   let locationPdfLine = "Lokasi: (tiada GPS)";
@@ -815,11 +809,7 @@ function downloadReceiptPdf() {
 
   const { jsPDF } = window.jspdf;
 
-  const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4"
-  });
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
   const pageWidth  = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -877,7 +867,6 @@ function downloadReceiptPdf() {
 
     const line = `${idx + 1}. ${mat} | ${wKg} kg | RM ${ratePerKg.toFixed(2)}/kg | RM ${itemRM.toFixed(2)} | ${itemPoints.toFixed(0)} mata`;
 
-    // page break kalau hampir habis
     if (y > pageHeight - 30) {
       doc.addPage();
       y = margin;
@@ -894,45 +883,36 @@ function downloadReceiptPdf() {
 
   doc.setFont("helvetica", "italic");
   doc.setFontSize(10);
-  doc.text(
-    "Terima kasih kerana menyokong aktiviti kitar semula bersama EcoRecycle.",
-    margin,
-    y
-  );
+  doc.text("Terima kasih kerana menyokong aktiviti kitar semula bersama EcoRecycle.", margin, y);
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(
-    "Resit ini dijana secara automatik oleh sistem EcoRecycle.",
-    margin,
-    pageHeight - 15
-  );
+  doc.text("Resit ini dijana secara automatik oleh sistem EcoRecycle.", margin, pageHeight - 15);
 
   doc.save("Resit_EcoRecycle.pdf");
 }
 
-
 // ====================================
 //  INIT – GUARD LOGIN + ATTACH EVENT
 // ====================================
-
 document.addEventListener("DOMContentLoaded", function () {
   const loginForm     = document.getElementById("loginForm");
   const signupForm    = document.getElementById("signupForm");
   const requestForm   = document.getElementById("requestForm");
   const calcContainer = document.getElementById("calcContainer");
+  const forgotForm    = document.getElementById("forgotForm"); // ✅ BARU
 
   const isLoginPage   = !!loginForm;
   const isSignupPage  = !!signupForm;
   const isRequestPage = !!requestForm;
   const isResitPage   = !!calcContainer;
 
-  // setiap kali buka login → anggap logout
+  // setiap kali buka login → anggap logout (kekal macam code kau)
   if (isLoginPage) {
     clearLoginSession();
   }
 
-  // ✅ NAVBAR RULES
+  // NAVBAR RULES
   updateEcoNavbar();
 
   const loggedIn = isLoggedIn();
@@ -953,6 +933,11 @@ document.addEventListener("DOMContentLoaded", function () {
   // LOGIN PAGE
   if (isLoginPage && loginForm && !loginForm.hasAttribute("onsubmit")) {
     loginForm.addEventListener("submit", handleLogin);
+  }
+
+  // ✅ FORGOT PASSWORD (INDEX PAGE)
+  if (forgotForm) {
+    forgotForm.addEventListener("submit", handleForgotPassword);
   }
 
   // REQUEST PAGE
