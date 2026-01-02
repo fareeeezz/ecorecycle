@@ -1,69 +1,75 @@
-// ===============================
-// LOGIN
-// ===============================
-function handleLogin() {
-  const role = document.getElementById("loginRole").value;
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+function updateUserPassword(username, phone, newPassword) {
+  const users = getRegisteredUsers();
+  const unameNorm = (username || "").trim().toLowerCase();
+  const phoneNorm = (phone || "").replace(/\D/g, "");
 
-  if (!username || !password) {
-    alert("Sila isi username dan kata laluan.");
-    return;
+  const idx = users.findIndex(u =>
+    (u.username || "").trim().toLowerCase() === unameNorm &&
+    (u.phone || "").replace(/\D/g, "") === phoneNorm
+  );
+
+  if (idx === -1) return false;
+
+  users[idx].password = newPassword;
+  saveRegisteredUsers(users);
+  return true;
+}
+
+function handleForgotPassword(event) {
+  event.preventDefault();
+
+  const uEl = document.getElementById("forgotUsername");
+  const pEl = document.getElementById("forgotPhone");
+  const nEl = document.getElementById("forgotNewPassword");
+  const cEl = document.getElementById("forgotConfirmPassword");
+
+  if (!uEl || !pEl || !nEl || !cEl) {
+    alert("Ralat: borang forgot password tidak lengkap.");
+    return false;
   }
 
-  // Rider login (simple demo)
-  if (role === "rider") {
-    if (username === "rider" && password === "rider123") {
-      sessionStorage.setItem("eco_role", "rider");
-      window.location.href = "rider.html";
-      return;
-    } else {
-      alert("Akaun rider tidak sah.");
-      return;
+  const username = uEl.value.trim();
+  const phone = pEl.value.trim();
+  const newPass = nEl.value.trim();
+  const confirm = cEl.value.trim();
+
+  if (!username || !phone || !newPass || !confirm) {
+    alert("Sila isi semua ruangan.");
+    return false;
+  }
+
+  if (newPass.length < 4) {
+    alert("Kata laluan terlalu pendek. Masukkan sekurang-kurangnya 4 aksara.");
+    return false;
+  }
+
+  if (newPass !== confirm) {
+    alert("Confirm password tidak sama.");
+    return false;
+  }
+
+  const ok = updateUserPassword(username, phone, newPass);
+  if (!ok) {
+    alert("Akaun tidak dijumpai. Pastikan Username & No Telefon sama seperti semasa Sign Up.");
+    return false;
+  }
+
+  alert("Reset berjaya! Sila log masuk menggunakan kata laluan baru.");
+
+  // Tutup modal kalau ada bootstrap
+  try {
+    const modalEl = document.getElementById("forgotModal");
+    if (modalEl && window.bootstrap) {
+      const m = window.bootstrap.Modal.getInstance(modalEl) || new window.bootstrap.Modal(modalEl);
+      m.hide();
     }
-  }
+  } catch (e) {}
 
-  // Customer login (guna localStorage)
-  const users = JSON.parse(localStorage.getItem("eco_users")) || [];
-  const user = users.find(
-    u => u.username === username && u.password === password
-  );
+  // clear input
+  uEl.value = "";
+  pEl.value = "";
+  nEl.value = "";
+  cEl.value = "";
 
-  if (!user) {
-    alert("Username atau kata laluan salah.");
-    return;
-  }
-
-  sessionStorage.setItem("eco_role", "customer");
-  sessionStorage.setItem("eco_user", JSON.stringify(user));
-  window.location.href = "request.html";
-}
-
-// ===============================
-// FORGOT PASSWORD (DEMO)
-// ===============================
-function forgotPassword() {
-  const username = prompt("Masukkan username anda:");
-
-  if (!username) return;
-
-  const users = JSON.parse(localStorage.getItem("eco_users")) || [];
-  const user = users.find(u => u.username === username);
-
-  if (!user) {
-    alert("Akaun tidak dijumpai.");
-    return;
-  }
-
-  alert(
-    `DEMO SAHAJA\n\nKata laluan anda ialah:\n${user.password}\n\n(Sistem sebenar guna OTP / email)`
-  );
-}
-
-// ===============================
-// LOGOUT (DIGUNAKAN DI CUSTOMER & RIDER)
-// ===============================
-function logout() {
-  sessionStorage.clear();
-  window.location.href = "index.html";
+  return false;
 }
