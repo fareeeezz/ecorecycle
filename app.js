@@ -225,6 +225,29 @@ function saveRequest(request) {
 }
 
 // ====================================
+//  ORDER QUEUE (UNTUK RIDER)
+// ====================================
+
+function getAllOrders() {
+  try {
+    const data = localStorage.getItem("eco_orders");
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveOrderForRider(order) {
+  const orders = getAllOrders();
+  orders.push({
+    ...order,
+    createdAt: new Date().toISOString(),
+    status: "Pending"
+  });
+  localStorage.setItem("eco_orders", JSON.stringify(orders));
+}
+
+// ====================================
 //  RIDER QUEUE (localStorage) - BARU
 // ====================================
 function pushOrderToRiderQueue(request) {
