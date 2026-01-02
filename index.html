@@ -2,65 +2,31 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <title>EcoRecycle – Log Masuk</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Style asal awak -->
+  <title>EcoRecycle | Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<body class="app-body">
+<div class="card">
+  <h2>EcoRecycle</h2>
+  <p>Log masuk sebagai</p>
 
-  <!-- VIDEO BACKGROUND -->
-  <video autoplay muted loop playsinline id="bgVideo">
-    <source src="eco-bg.mp4" type="video/mp4">
-  </video>
+  <select id="role">
+    <option value="customer">Customer</option>
+    <option value="rider">Rider</option>
+  </select>
 
-  <!-- LOGIN CARD -->
-  <main class="auth-main">
-    <div class="auth-card">
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Kata Laluan">
 
-      <h1 class="auth-title">EcoRecycle</h1>
-      <p class="auth-subtitle">Pickup Kitar Semula Komuniti</p>
+  <button onclick="login()">Log Masuk</button>
 
-      <!-- ROLE -->
-      <div class="mb-3">
-        <label class="form-label">Log masuk sebagai</label>
-        <select id="loginRole" class="form-select">
-          <option value="customer">Customer</option>
-          <option value="rider">Rider</option>
-        </select>
-      </div>
+  <p>
+    <a href="signup.html">Daftar Akaun</a> |
+    <a href="forgot.html">Lupa Kata Laluan?</a>
+  </p>
+</div>
 
-      <!-- USERNAME -->
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input type="text" id="username" class="form-control" placeholder="Contoh: kimi" required>
-      </div>
-
-      <!-- PASSWORD -->
-      <div class="mb-3">
-        <label class="form-label">Kata Laluan</label>
-        <input type="password" id="password" class="form-control" placeholder="••••••" required>
-      </div>
-
-      <!-- LOGIN BUTTON -->
-      <button class="btn btn-eco-primary w-100 mb-3" onclick="handleLogin()">
-        Log Masuk
-      </button>
-
-      <!-- LINKS -->
-      <div class="text-center small">
-        <a href="signup.html">Daftar Akaun</a> ·
-        <a href="#" onclick="forgotPassword()">Lupa Kata Laluan?</a>
-      </div>
-
-    </div>
-  </main>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
