@@ -1,66 +1,77 @@
-function getAllOrders() {
-  try {
-    const data = localStorage.getItem("eco_orders");
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
+// ===============================
+// Rider Portal (Demo) - rider.js
+// Tidak kacau app.js (customer)
+// ===============================
+
+const RIDER_DEMO = {
+  username: "rider",
+  password: "1234"
+};
+
+function setRiderLoggedIn(username) {
+  sessionStorage.setItem("eco_rider_logged_in", "1");
+  sessionStorage.setItem("eco_rider_user", JSON.stringify({ username }));
 }
 
-function renderRiderOrders() {
-  const container = document.getElementById("riderOrders");
-  if (!container) return;
+function isRiderLoggedIn() {
+  return sessionStorage.getItem("eco_rider_logged_in") === "1";
+}
 
-  const orders = getAllOrders();
+function getRiderUser() {
+  const d = sessionStorage.getItem("eco_rider_user");
+  return d ? JSON.parse(d) : null;
+}
 
-  if (orders.length === 0) {
-    container.innerHTML = `
-      <div class="alert alert-info">
-        Tiada order buat masa ini.
-      </div>
-    `;
+function riderLogout() {
+  sessionStorage.removeItem("eco_rider_logged_in");
+  sessionStorage.removeItem("eco_rider_user");
+  window.location.href = "rider.html";
+}
+
+function showRiderPanel() {
+  const form = document.getElementById("riderLoginForm");
+  const panel = document.getElementById("riderPanel");
+  const status = document.getElementById("riderStatusText");
+
+  if (form) form.style.display = "none";
+  if (panel) panel.style.display = "block";
+
+  const rider = getRiderUser();
+  if (status) status.textContent = `Berjaya log masuk sebagai: ${rider?.username || "rider"}`;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("riderLoginForm");
+  const logoutBtn = document.getElementById("riderLogoutBtn");
+
+  if (logoutBtn) logoutBtn.addEventListener("click", riderLogout);
+
+  // Kalau dah login, terus tunjuk dashboard
+  if (isRiderLoggedIn()) {
+    showRiderPanel();
     return;
   }
 
-  let html = `
-    <div class="table-responsive">
-      <table class="table table-bordered align-middle">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Telefon</th>
-            <th>Barang</th>
-            <th>Lokasi</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-  `;
+  if (!form) return;
 
-  orders.forEach((o, i) => {
-    const items = (o.items || []).map(
-      it => `${it.material} (${it.weightKg}kg)`
-    ).join("<br>");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-    const loc = o.location
-      ? `<a target="_blank" href="https://maps.google.com/?q=${o.location.lat},${o.location.lng}">Buka Map</a>`
-      : "Tiada lokasi";
+    const u = document.getElementById("riderUsername")?.value?.trim() || "";
+    const p = document.getElementById("riderPassword")?.value?.trim() || "";
 
-    html += `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${o.user.username}</td>
-        <td>${o.user.phone}</td>
-        <td>${items}</td>
-        <td>${loc}</td>
-        <td>${o.status}</td>
-      </tr>
-    `;
+    if (!u || !p) {
+      alert("Sila isi Rider ID dan Kata Laluan.");
+      return;
+    }
+
+    // Demo check
+    if (u === RIDER_DEMO.username && p === RIDER_DEMO.password) {
+      setRiderLoggedIn(u);
+      showRiderPanel();
+      return;
+    }
+
+    alert("Rider ID / kata laluan salah (demo: rider / 1234).");
   });
-
-  html += `</tbody></table></div>`;
-  container.innerHTML = html;
-}
-
-document.addEventListener("DOMContentLoaded", renderRiderOrders);
+});
